@@ -1,15 +1,16 @@
 #include "cheapTricks.h"
 #include "minimath.h"
 
+
+
 bool isPresent(const char *flags, const char flag){
+  int badStringLimiter = 26; //in case string pointer is garbage we don't want to read all of ram
+
   if(flags) {
-    int badStringLimiter = 26; // in case string pointer is garbage we don't want to read all of ram
-    while(char probe = *flags++) {
+    char probe;
+    while((probe = *flags++) && badStringLimiter-- > 0) {
       if(flag == probe) {
         return true;
-      }
-      if(--badStringLimiter == 0) {
-        return false;
       }
     }
   }
@@ -17,8 +18,8 @@ bool isPresent(const char *flags, const char flag){
 } /* isPresent */
 
 
-bool changed(double &target, double newvalue){
-  if(! nearly(target, newvalue)) {
+bool changed(double&target, double newvalue){
+  if(!nearly(target,newvalue)){
     target = newvalue;
     return true;
   } else {
