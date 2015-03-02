@@ -1,0 +1,6 @@
+*bak
+*.bak.[2-9]
+dro
+dro.pro.user
+verbose.map
+dro.hzs
