@@ -3,10 +3,9 @@
 #if __linux__
 #include <limits>
 const double Infinity = std::numeric_limits<double>::infinity();
-const double Nan = std::numeric_limits<double>::quiet_NaN();;
+const double Nan = std::numeric_limits<double>::quiet_NaN();
 #else
 //firmware platform didn't have a useful limits.h so ...
-
 const double Infinity=static_cast<const double>(0x7FFLL<<52);
 const double Nan=     static_cast<const double>(0x7FF8LL<<48);
 #endif

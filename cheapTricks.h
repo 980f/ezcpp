@@ -45,9 +45,11 @@ public:
   ~AssignOnExit (){
     zipperatus = onexit;
   }
+  /** access wrapped entity via this object, handy when wrapping a dynamically selected item */
   operator Scalar() const {
     return zipperatus;
   }
+  /** @returns eventual value - present value , the change that will be imposed at exit */
   Scalar delta(void){
     return onexit - zipperatus;
   }
@@ -63,13 +65,14 @@ template <typename Scalar> Scalar postAssign(Scalar&varb, Scalar value){
 /** form of ClearOnExit for use in a return statement: */
 template <typename Scalar> Scalar flagged(Scalar&varb) ISRISH;
 
+/** for test and clear, may eventually wrap atomic operation */
 template <typename Scalar> Scalar flagged(Scalar&varb) {
   Scalar was = varb;
   varb = 0;
   return was;
 }
 
-//custom instantiation for breakpointing on change.
+//custom instantiation for breakpointing on boolean change.
 inline bool flagged(bool &varb){
   if(varb){
     varb=0;
@@ -79,7 +82,7 @@ inline bool flagged(bool &varb){
   }
 }
 
-/** if @param varb is false set it to true and return true else return false.*/
+/** if @param varb is false sets it to true and @returns true else return false.*/
 inline bool notAlready(bool &varb){
   if(!varb){
     varb=true;

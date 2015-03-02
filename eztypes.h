@@ -19,49 +19,19 @@ typedef int16_t s16;
 typedef int32_t s32;
 typedef int64_t s64;
 
-//legacy macro, don't use this for new code.
+//for when you have to do something sneaky:
 #define pun(type, lvalue) (*reinterpret_cast <type *> (&(lvalue)))
+
+/**for when you want to live dangerously.
+ * We use the convention that all references have been confirmed non-null.
+ * only use this when you are feeding an &(expression) */
+#define NULLREFERENCE(type) (*reinterpret_cast <type *> (0))
 
 //lord it would be nice if C would make a standard operator for this:
 #define countof(array) (sizeof(array) / sizeof(array[0]))
 
-//for non-bit addressable items:
-inline bool bit(int patter, unsigned bitnumber){
-  return (patter & (1 << bitnumber)) != 0;
-}
-
-/** @returns @param width number of ls bits set to 1 */
-inline unsigned int fieldMask(int width){
-  return (1 << width) - 1;
-}
-
-/** use the following when offset or width are NOT constants, else you should be able to define bit fields in a struct and let the compiler to any inserting*/
-inline unsigned int insertField(unsigned int target, unsigned int source, unsigned int offset, unsigned int width){
-  unsigned int mask = fieldMask(width)<<offset;
-  return (target & ~mask) | ((source << offset) & mask);
-}
-
-inline unsigned int extractField(unsigned int source, unsigned int offset, unsigned int width){
-  return (source >> offset) & fieldMask(width);
-}
-
 /** for a private single instance block */
 #define soliton(type, address) type & the ## type = *reinterpret_cast <type *> (address);
-
-/** instantiate one of these as a local variable at the start of a compound statement to ensure the given 'lock' bit is set to !polarity for all exit paths of that block
-  */
-class BitLock {
-  u32&locker; //for stm32 mcu this can be the bit band address of something
-  u32 polarity;
-/** construction assigns to the lock bit*/
-  BitLock( u32 & lockBit, u32 _polarity): locker(lockBit), polarity(_polarity){
-    locker = polarity;
-  }
-  /** destruction assigns to opposite of original assignment, blowing away any interim assignments */
-  ~BitLock (){
-    locker = !polarity;
-  }
-};
 
 //in case some other compiler is used someday, this is gcc specific:
 #define PACKED __attribute__ ((packed))
@@ -73,7 +43,14 @@ class BitLock {
 #define ISRISH
 #endif
 
-//never worked per spec, not sure if it was perfectly wrong: #define InitStep(k) __attribute__((init_priority(k)))
+
+//note: the linker is the agent that makes this happen. It failed in the past with Rowley scripts as they left out SORT(...)
+//requires proper linker script:
+#define InitStep(k) __attribute__((init_priority(k)))
+//lower happens first. some dox say leave 0..1024 for the compiler.
+#define InitHardware 10000
+#define InitUserLibrary 20000
+#define InitApplication 30000
 
 #if 0 //missing on windows (mingw) platform compiler, expected by cwchar
 void swprintf();

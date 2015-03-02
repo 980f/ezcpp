@@ -2,10 +2,6 @@
 #define BITBANGER_H
 
 /** bit and bitfield setting and getting.*/
-//////////////////////////////////////////
-///  one-time pick bits as straight up functions
-///
-
 
 inline bool bit(int patter, unsigned bitnumber){
   return (patter & (1 << bitnumber)) != 0;
@@ -27,22 +23,18 @@ inline unsigned int extractField(unsigned int source, unsigned int msb, unsigned
   return (source&fieldMask(msb,lsb)) >> lsb ;
 }
 
-///
-/////////////////////
-/// now for when the bits to pick are referenced multiple times
-///
-
-/** Create this object around a field of an actual data item.
+/** for when the bits to pick are referenced multiple times
  * trying to bind the address as a template arg runs afould of the address not being knowable at compile time*/
 template <unsigned lsb, unsigned msb> class BitFielder {
   enum {
-    mask = ((1 << (msb + 1)) - (1 << lsb)) // aligned mask
+    mask = fieldMask(msb ,lsb) // aligned mask
   };
 public:
   unsigned extract(unsigned &item) const {
     return (item & mask) >> lsb;
   }
-  unsigned merge(unsigned &item,unsigned value) const {
+
+  unsigned mergeInto(unsigned &item,unsigned value) const {
     register unsigned merged= (item & ~mask) | ((value << lsb) & mask);
     item=merged;
     return merged;
@@ -50,22 +42,18 @@ public:
 };
 
 
-
 /** Create this object around a field of an actual data item.
  * trying to bind the address as a template arg runs afould of the address not being knowable at compile time*/
-template <unsigned lsb, unsigned msb> class BitField {
-  enum {
-    mask = ((1 << (msb + 1)) - (1 << lsb)) // aligned mask
-  };
+template <unsigned lsb, unsigned msb> class BitField: public BitFielder<lsb,msb> {
   unsigned &item;
 public:
   BitField(unsigned &item): item(item){
   }
   operator unsigned() const {
-    return (item & mask) >> lsb;
+    return BitFielder<lsb,msb>::extract(item);
   }
   void operator =(unsigned value) const {
-    item = (item & ~mask) | ((value << lsb) & mask);
+    BitFielder<lsb,msb>mergeInto(item ,value );
   }
 };
 
@@ -102,7 +90,7 @@ public:
 
 /** assemble a bit field, without using stl. */
 template <unsigned pos, unsigned ... poss> struct BitWad<pos, poss ...> {
-  enum { mask = (1 << pos) + BitWad<poss ...>::mask };
+  enum { mask = (1 << pos) | BitWad<poss ...>::mask };
 
 public:
   static bool exactly(unsigned varble, unsigned match){
