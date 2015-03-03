@@ -52,6 +52,13 @@ typedef int64_t s64;
 #define InitUserLibrary 20000
 #define InitApplication 30000
 
+#if __linux__
+#define NAKED
+#else
+//the following won't compile while the defined value is just fine ?!?
+#define NAKED __attribute__((naked))
+#endif
+
 #if 0 //missing on windows (mingw) platform compiler, expected by cwchar
 void swprintf();
 void vswprintf();
