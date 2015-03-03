@@ -3,9 +3,36 @@
 
 /** bit and bitfield setting and getting.*/
 
-inline bool bit(int patter, unsigned bitnumber){
+inline bool bit(unsigned patter, unsigned bitnumber){
   return (patter & (1 << bitnumber)) != 0;
 }
+
+inline bool setBit(unsigned &patter, unsigned bitnumber){
+  return patter |= (1 << bitnumber);
+}
+
+inline bool clearBit(unsigned &patter, unsigned bitnumber){
+  return patter &= ~(1 << bitnumber);
+}
+
+inline bool assignBit(unsigned &pattern, unsigned bitnumber,bool one){
+  if(one){
+    setBit(pattern,bitnumber);
+  } else {
+    clearBit(pattern,bitnumber);
+  }
+  return one;
+}
+
+/** use the following when only one of offset or width are constants */
+inline unsigned int insertField(unsigned target, unsigned source, unsigned mask){
+  return (target & ~mask) | (source & mask);
+}
+
+inline unsigned mergeInto(unsigned &target, unsigned source, unsigned mask){
+  return target= insertField(target,source, mask);
+}
+
 
 /** @returns bits @param msb through @param lsb set to 1.
  * Default arg allows one to pass a width for lsb aligned mask of that many bits */
@@ -15,19 +42,44 @@ constexpr unsigned fieldMask(unsigned msb,unsigned lsb=0){
 
 /** use the following when offset or width are NOT constants, else you should be able to define bit fields in a struct and let the compiler to any inserting*/
 inline unsigned int insertField(unsigned target, unsigned source, unsigned msb, unsigned lsb){
-  register unsigned mask = fieldMask(msb,lsb);
-  return (target & ~mask) | ((source << lsb) & mask);
+  return insertField(target, source<<lsb ,fieldMask(msb,lsb));
+}
+
+inline unsigned mergeField(unsigned &target, unsigned source, unsigned msb, unsigned lsb){
+  return target=insertField(target,source,msb,lsb);
 }
 
 inline unsigned int extractField(unsigned int source, unsigned int msb, unsigned int lsb){
   return (source&fieldMask(msb,lsb)) >> lsb ;
 }
 
-/** for when the bits to pick are referenced multiple times
+
+/** @returns bits @param lsb for width @param width set to 1.
+ * Default arg allows one to pass a width for lsb aligned mask of that many bits */
+constexpr unsigned bitMask(unsigned lsb,unsigned width=1){
+  return (1 << (lsb+width+1)) - (1<<lsb);
+}
+
+/** use the following when offset or width are NOT constants, else you should be able to define bit fields in a struct and let the compiler to any inserting*/
+inline unsigned int insertBits(unsigned target, unsigned source, unsigned lsb, unsigned width){
+  return insertField(target, source<<lsb ,bitMask(lsb,width));
+}
+
+inline unsigned mergeBits(unsigned &target, unsigned source, unsigned lsb, unsigned width){
+  return mergeInto(target,source<<lsb,bitMask(lsb,width));
+}
+
+inline unsigned int extractBits(unsigned int source, unsigned int lsb, unsigned int width){
+  return (source & bitMask(lsb,width)) >> lsb ;
+}
+
+
+
+/** for when the bits to pick are referenced multiple times and are compile time constant
  * trying to bind the address as a template arg runs afould of the address not being knowable at compile time*/
-template <unsigned lsb, unsigned msb> class BitFielder {
+template <unsigned lsb, unsigned msb, bool msbIsWidth=false> class BitFielder {
   enum {
-    mask = fieldMask(msb ,lsb) // aligned mask
+    mask = msbIsWidth?bitMask(lsb,msb):fieldMask(msb ,lsb) // aligned mask
   };
 public:
   unsigned extract(unsigned &item) const {
@@ -44,7 +96,7 @@ public:
 
 /** Create this object around a field of an actual data item.
  * trying to bind the address as a template arg runs afould of the address not being knowable at compile time*/
-template <unsigned lsb, unsigned msb> class BitField: public BitFielder<lsb,msb> {
+template <unsigned lsb, unsigned msb, bool msbIsWidth=false> class BitField: public BitFielder<lsb,msb,msbIsWidth> {
   unsigned &item;
 public:
   BitField(unsigned &item): item(item){
