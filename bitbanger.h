@@ -57,7 +57,7 @@ inline unsigned int extractField(unsigned int source, unsigned int msb, unsigned
 /** @returns bits @param lsb for width @param width set to 1.
  * Default arg allows one to pass a width for lsb aligned mask of that many bits */
 constexpr unsigned bitMask(unsigned lsb,unsigned width=1){
-  return (1 << (lsb+width+1)) - (1<<lsb);
+  return (1 << (lsb+width)) - (1<<lsb);
 }
 
 /** use the following when offset or width are NOT constants, else you should be able to define bit fields in a struct and let the compiler to any inserting*/
