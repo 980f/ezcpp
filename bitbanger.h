@@ -29,7 +29,7 @@ inline unsigned int insertField(unsigned target, unsigned source, unsigned mask)
   return (target & ~mask) | (source & mask);
 }
 
-inline unsigned mergeInto(unsigned &target, unsigned source, unsigned mask){
+inline unsigned mergeInto(volatile unsigned &target, unsigned source, unsigned mask){
   return target= insertField(target,source, mask);
 }
 
@@ -45,7 +45,7 @@ inline unsigned int insertField(unsigned target, unsigned source, unsigned msb, 
   return insertField(target, source<<lsb ,fieldMask(msb,lsb));
 }
 
-inline unsigned mergeField(unsigned &target, unsigned source, unsigned msb, unsigned lsb){
+inline unsigned mergeField(volatile unsigned &target, unsigned source, unsigned msb, unsigned lsb){
   return target=insertField(target,source,msb,lsb);
 }
 
@@ -65,7 +65,7 @@ inline unsigned int insertBits(unsigned target, unsigned source, unsigned lsb, u
   return insertField(target, source<<lsb ,bitMask(lsb,width));
 }
 
-inline unsigned mergeBits(unsigned &target, unsigned source, unsigned lsb, unsigned width){
+inline unsigned mergeBits(volatile unsigned &target, unsigned source, unsigned lsb, unsigned width){
   return mergeInto(target,source<<lsb,bitMask(lsb,width));
 }
 
