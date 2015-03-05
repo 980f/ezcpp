@@ -1,5 +1,4 @@
-#ifndef eztypes_h
-#define eztypes_h
+#pragma once
 
 //platform differences manager
 #include <stdint.h>  //<cstdint> not available on micro.
@@ -47,7 +46,7 @@ typedef int64_t s64;
 //note: the linker is the agent that makes this happen. It failed in the past with Rowley scripts as they left out SORT(...)
 //requires proper linker script:
 #define InitStep(k) __attribute__((init_priority(k)))
-//lower happens first. some dox say leave 0..1024 for the compiler.
+//lower happens first. some dox say leave 0..101 for the compiler.
 #define InitHardware 10000
 #define InitUserLibrary 20000
 #define InitApplication 30000
@@ -58,10 +57,3 @@ typedef int64_t s64;
 //the following won't compile while the defined value is just fine ?!?
 #define NAKED __attribute__((naked))
 #endif
-
-#if 0 //missing on windows (mingw) platform compiler, expected by cwchar
-void swprintf();
-void vswprintf();
-#endif
-
-#endif /* ifndef eztypes_h */
