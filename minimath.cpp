@@ -1,6 +1,6 @@
 #include "minimath.h"
 
-#if __linux__
+#if 0 && __linux__
 #include <limits>
 const double Infinity = std::numeric_limits<double>::infinity();
 const double Nan = std::numeric_limits<double>::quiet_NaN();
@@ -9,6 +9,17 @@ const double Nan = std::numeric_limits<double>::quiet_NaN();
 const double Infinity=static_cast<const double>(0x7FFLL<<52);
 const double Nan=     static_cast<const double>(0x7FF8LL<<48);
 #endif
+
+extern "C" {
+//stubs.cpp keeps on getting lost, inline those here weakly:
+
+/** @returns @param arg*num/denom rounded and overflow managed (internal 64 bit temps)  */
+u32 muldivide(u32 arg, u32 num, u32 denom) WEAK;
+u32 muldivide(u32 arg, u32 num, u32 denom){
+  return rate(arg*num,denom);
+}
+
+}//end stubs
 
 const u32 Decimal1[] = {
   1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000,
@@ -23,7 +34,6 @@ int ilog10(u32 value){
   }
   return -1;
 }
-
 
 //uround and sround are coded to be like they will in optimized assembly
 u16 uround(float scaled){
@@ -198,27 +208,24 @@ u32 Pnr(unsigned n, unsigned  r){
     return n;
   }
   u32 num=n;
-  while(r-->0){
-    num*=--n;
+  while(n-->r){//n!/(n-r)!
+    num*=n;
   }
   return num;
 }
 
 ///** n!/r!(n-r)! = n*(n-1)..*(n-r+1) / r! */
-//u32 Cnr(unsigned n, unsigned  r){
-//  if(r<=0){//frequent case and avert naive divide by zero
-//    return 1;
-//  }
-//  if(r==1){//fairly frequent case
-//    return n;
-//  }
-//  u32 num=n;
-//  while(n-->r){//n!/(n-r)!
-//    num*=n;
-//  }
-//  u32 den=r;
-//  while(r-->1){
-//    den*=r;
-//  }
-//  return num/den;//#zero is checked
-//}
+u32 Cnr(unsigned n, unsigned  r){
+  if(r<=0){//frequent case and avert naive divide by zero
+    return 1;
+  }
+  if(r==1){//fairly frequent case
+    return n;
+  }
+  u32 num=Pnr(n,r);
+  u32 den=r;
+  while(r-->2){
+    den*=r;
+  }
+  return num/den;//#zero is checked
+}

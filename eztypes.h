@@ -29,9 +29,6 @@ typedef int64_t s64;
 //lord it would be nice if C would make a standard operator for this:
 #define countof(array) (sizeof(array) / sizeof(array[0]))
 
-///** for a private single instance block */
-//#define soliton(type, address) type & the ## type = *reinterpret_cast <type *> (address);
-
 //in case some other compiler is used someday, this is gcc specific:
 #define PACKED __attribute__ ((packed))
 
@@ -50,6 +47,8 @@ typedef int64_t s64;
 #define InitHardware 10000
 #define InitUserLibrary 20000
 #define InitApplication 30000
+
+#define WEAK __attribute__((weak))
 
 #if __linux__
 #define NAKED
