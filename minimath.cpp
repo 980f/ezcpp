@@ -19,6 +19,16 @@ u32 muldivide(u32 arg, u32 num, u32 denom){
   return rate(arg*num,denom);
 }
 
+u32 log2Exponent(u32 number) WEAK;
+u32 log2Exponent(u32 number){
+  int exponent=0;
+  while(number){
+    ++exponent;
+    number>>=1;
+  }
+  return exponent;
+}
+
 }//end stubs
 
 const u32 Decimal1[] = {
@@ -229,3 +239,5 @@ u32 Cnr(unsigned n, unsigned  r){
   }
   return num/den;//#zero is checked
 }
+
+

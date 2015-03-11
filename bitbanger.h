@@ -3,7 +3,7 @@
 
 /** bit and bitfield setting and getting.*/
 
-inline bool bit(unsigned patter, unsigned bitnumber){
+inline bool bit(unsigned &patter, unsigned bitnumber){
   return (patter & (1 << bitnumber)) != 0;
 }
 
@@ -15,6 +15,12 @@ inline bool clearBit(unsigned &patter, unsigned bitnumber){
   return patter &= ~(1 << bitnumber);
 }
 
+/** ensure a 0:1 transition occurs on given bit. */
+inline void raiseBit(unsigned &address, unsigned  bit){
+  clearBit(address, bit);
+  setBit(address, bit);
+}
+
 inline bool assignBit(unsigned &pattern, unsigned bitnumber,bool one){
   if(one){
     setBit(pattern,bitnumber);
@@ -23,6 +29,7 @@ inline bool assignBit(unsigned &pattern, unsigned bitnumber,bool one){
   }
   return one;
 }
+
 
 /** use the following when only one of offset or width are constants */
 inline unsigned int insertField(unsigned target, unsigned source, unsigned mask){

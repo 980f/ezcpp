@@ -1,5 +1,5 @@
-#ifndef minimath_h
-#define minimath_h
+#pragma once
+
 #include "eztypes.h"
 
 //portable nan etc. symbols, our compilers don't seem to agree on these guys, or the syntax is horrible.
@@ -196,52 +196,58 @@ template <typename Scalar> void swap(Scalar &a,Scalar &b){
 }
 
 extern "C" { //assembly coded in cortexm3.s, usually due to outrageously bad compilation by gcc
-  /** the time delay given by ticks is ambiguous, it depends upon processor clock. @72MHz 1000 ticks is roughly one microsecond.*/
-  void nanoSpin(unsigned ticks); //fast spinner, first used in soft I2C.
+/** the time delay given by ticks is ambiguous, it depends upon processor clock. @72MHz 1000 ticks is roughly one microsecond.*/
+void nanoSpin(unsigned ticks); //fast spinner, first used in soft I2C.
 
-  /** @returns @param arg*num/denom rounded and overflow managed (internal 64 bit temps)  */
-  u32 muldivide(u32 arg, u32 num, u32 denom);
+/** @returns @param arg*num/denom rounded and overflow managed (internal 64 bit temps)  */
+u32 muldivide(u32 arg, u32 num, u32 denom);
 
-  u16 saturated(unsigned quantity, double fractionThereof);
+u16 saturated(unsigned quantity, double fractionThereof);
 
-  //fraction is a fractional multiplier, with numbits stating how many fractional bits it has.
-  u16 fractionallyScale(u16 number, u16 fraction, u16 numbits);
+//fraction is a fractional multiplier, with numbits stating how many fractional bits it has.
+u16 fractionallyScale(u16 number, u16 fraction, u16 numbits);
 
-  /** @returns 1 + the integer part of log base 2 of the given number, pretty much is just "count the leading zeroes".
+/** @returns 1 + the integer part of log base 2 of the given number, pretty much is just "count the leading zeroes".
   * Note well that this will give 0 as the log of 0 rather than negative infinity, precheck the argument if you can't live with that.
   * mathematical definition: "number of right shifts necessary for an unsigned number to become 0"
   */
-  u32 log2Exponent(u32 number);
+u32 log2Exponent(u32 number);
 
-  /** @returns eff * 2^pow2  where pow2 is signed. This can be done rapidly via bitfiddling*/
-  float shiftScale(float eff, int pow2);
+/** @returns eff * 2^pow2  where pow2 is signed. This can be done rapidly via bitfiddling*/
+float shiftScale(float eff, int pow2);
 
-  double flog(u32 number);
-  double logRatio(u32 over, u32 under);
+double flog(u32 number);
+double logRatio(u32 over, u32 under);
 
-  u16 uround(float scaled);
-  s16 sround(float scaled);
+u16 uround(float scaled);
+s16 sround(float scaled);
 
-  /**NB: copyObject() and fillObject() can NOT be used with objects that contain polymorphic objects as they copy the virtual function tables */
-  void copyObject(const void *source, void *target, u32 length);
-  void fillObject(void *target, u32 length, u8 fill);
+/**NB: copyObject() and fillObject() can NOT be used with objects that contain polymorphic objects as they would copy the virtual function tables */
+void copyObject(const void *source, void *target, u32 length);
+void fillObject(void *target, u32 length, u8 fill);
 
-  //EraseThing only works on non-polymorphic types. On polymorphs it also  kills the vtable!
+//EraseThing only works on non-polymorphic types. On polymorphs it also  kills the vtable!
 #define EraseThing(thing) fillObject(thing, sizeof(thing), 0);
 
-  /** accessible portions of microcontroller startup code: 
-   note different order of args than std C library memcpy. */
-  void memory_copy(const void *source, void *target, void *sourceEnd);
-  /** @see memory_copy */
-  void memory_set(void *target, void *targetEnd, u8 value);
+/** accessible portions of microcontroller startup code:
+   note different order (and type!) of args than std C library memcpy. */
+void memory_copy(const void *source, void *target, void *sourceEnd);
+/** @see memory_copy */
+void memory_set(void *target, void *targetEnd, u8 value);
 
 #if 0 //  fixmelater //!defined( QT_CORE_LIB ) && !defined() //std lib's differ between pc and arm.
-  //the difference of two u16's should be a signed int. test your compiler.
-  inline u16 abs(int value){
-    return value > 0 ? value : -value;
-  }
+//the difference of two u16's should be a signed int. test your compiler.
+inline u16 abs(int value){
+  return value > 0 ? value : -value;
+}
 #endif
 
 } //end extern C for assembly coded routines.
 
-#endif
+/** @returns exponent that is highest power of 2 in the given number */
+template <unsigned powerof2,int count=-1> struct lb {
+  enum {
+    exponent=  powerof2? recurser<(powerof2>>1),count+1> :count
+  };
+};
+
