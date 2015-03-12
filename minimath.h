@@ -247,7 +247,7 @@ inline u16 abs(int value){
 /** @returns exponent that is highest power of 2 in the given number */
 template <unsigned powerof2,int count=-1> struct lb {
   enum {
-    exponent=  powerof2? recurser<(powerof2>>1),count+1> :count
+    exponent=  powerof2? lb<powerof2/2,count+1 >::exponent :count
   };
 };
 

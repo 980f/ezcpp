@@ -3,17 +3,41 @@
 
 /** bit and bitfield setting and getting.*/
 
-inline bool bit(unsigned &patter, unsigned bitnumber){
+
+/** @returns byte address argument as a pointer to that byte */
+inline constexpr unsigned& atAddress(unsigned address){
+  return *reinterpret_cast<unsigned *>(address);
+}
+
+constexpr bool bit(unsigned patter, unsigned bitnumber){
   return (patter & (1 << bitnumber)) != 0;
+}
+
+
+constexpr bool isOdd(unsigned pattern){
+  return pattern&1;
+}
+
+constexpr bool isEven(unsigned pattern){
+  return ! isOdd(pattern);
 }
 
 inline bool setBit(unsigned &patter, unsigned bitnumber){
   return patter |= (1 << bitnumber);
 }
 
+inline bool setBitAt(unsigned addr, unsigned bitnumber){
+  return setBit(atAddress(addr),bitnumber);
+}
+
 inline bool clearBit(unsigned &patter, unsigned bitnumber){
   return patter &= ~(1 << bitnumber);
 }
+
+inline bool clearBitAt(unsigned addr, unsigned bitnumber){
+  return clearBit(atAddress(addr),bitnumber);
+}
+
 
 /** ensure a 0:1 transition occurs on given bit. */
 inline void raiseBit(unsigned &address, unsigned  bit){
@@ -32,7 +56,7 @@ inline bool assignBit(unsigned &pattern, unsigned bitnumber,bool one){
 
 
 /** use the following when only one of offset or width are constants */
-inline unsigned int insertField(unsigned target, unsigned source, unsigned mask){
+constexpr unsigned int insertField(unsigned target, unsigned source, unsigned mask){
   return (target & ~mask) | (source & mask);
 }
 
@@ -48,7 +72,7 @@ constexpr unsigned fieldMask(unsigned msb,unsigned lsb=0){
 }
 
 /** use the following when offset or width are NOT constants, else you should be able to define bit fields in a struct and let the compiler to any inserting*/
-inline unsigned int insertField(unsigned target, unsigned source, unsigned msb, unsigned lsb){
+constexpr unsigned int insertField(unsigned target, unsigned source, unsigned msb, unsigned lsb){
   return insertField(target, source<<lsb ,fieldMask(msb,lsb));
 }
 
@@ -68,7 +92,7 @@ constexpr unsigned bitMask(unsigned lsb,unsigned width=1){
 }
 
 /** use the following when offset or width are NOT constants, else you should be able to define bit fields in a struct and let the compiler to any inserting*/
-inline unsigned int insertBits(unsigned target, unsigned source, unsigned lsb, unsigned width){
+constexpr unsigned int insertBits(unsigned target, unsigned source, unsigned lsb, unsigned width){
   return insertField(target, source<<lsb ,bitMask(lsb,width));
 }
 
@@ -76,7 +100,7 @@ inline unsigned mergeBits(volatile unsigned &target, unsigned source, unsigned l
   return mergeInto(target,source<<lsb,bitMask(lsb,width));
 }
 
-inline unsigned int extractBits(unsigned int source, unsigned int lsb, unsigned int width){
+constexpr unsigned extractBits(unsigned source, unsigned lsb, unsigned width){
   return (source & bitMask(lsb,width)) >> lsb ;
 }
 
