@@ -5,6 +5,7 @@
 
 
 /** @returns byte address argument as a pointer to that byte */
+__attribute__((always_inline))  //irritating during debug.
 inline constexpr unsigned& atAddress(unsigned address){
   return *reinterpret_cast<unsigned *>(address);
 }
@@ -22,7 +23,7 @@ constexpr bool isEven(unsigned pattern){
   return ! isOdd(pattern);
 }
 
-inline bool setBit(unsigned &patter, unsigned bitnumber){
+inline bool setBit(volatile unsigned &patter, unsigned bitnumber){
   return patter |= (1 << bitnumber);
 }
 
@@ -30,7 +31,7 @@ inline bool setBitAt(unsigned addr, unsigned bitnumber){
   return setBit(atAddress(addr),bitnumber);
 }
 
-inline bool clearBit(unsigned &patter, unsigned bitnumber){
+inline bool clearBit(volatile unsigned &patter, unsigned bitnumber){
   return patter &= ~(1 << bitnumber);
 }
 
@@ -40,7 +41,7 @@ inline bool clearBitAt(unsigned addr, unsigned bitnumber){
 
 
 /** ensure a 0:1 transition occurs on given bit. */
-inline void raiseBit(unsigned &address, unsigned  bit){
+inline void raiseBit(volatile unsigned &address, unsigned  bit){
   clearBit(address, bit);
   setBit(address, bit);
 }
