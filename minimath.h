@@ -135,7 +135,8 @@ template <typename floating> bool nearly(floating value,floating other,int bits=
   return cf<=f1 && cf<=f2;
 }
 
-extern const u32 Decimal1[];
+/** @returns the integer part of the log base 10 of @param value.
+ * That is the number of decimal digits to the left of the radix point */
 int ilog10(u32 value);
 
 /** filtering in case we choose to optimize this */
@@ -207,11 +208,12 @@ u16 saturated(unsigned quantity, double fractionThereof);
 //fraction is a fractional multiplier, with numbits stating how many fractional bits it has.
 u16 fractionallyScale(u16 number, u16 fraction, u16 numbits);
 
-/** @returns 1 + the integer part of log base 2 of the given number, pretty much is just "count the leading zeroes".
-  * Note well that this will give 0 as the log of 0 rather than negative infinity, precheck the argument if you can't live with that.
-  * mathematical definition: "number of right shifts necessary for an unsigned number to become 0"
+/** this has waffled about a bit, differing by one in its return for various vintages.
+ * @returns value such that 1<<return is >= @param number.
+ * want 1->0, 0->-1, 2^n->n (2^n + 2^k)->n
+  * Note well that this will give -1 as the log of 0 rather than negative infinity, precheck the argument if you can't live with that.
   */
-u32 log2Exponent(u32 number);
+int log2bExponent(u32 number);
 
 /** @returns eff * 2^pow2  where pow2 is signed. This can be done rapidly via bitfiddling*/
 float shiftScale(float eff, int pow2);
@@ -229,8 +231,7 @@ void fillObject(void *target, u32 length, u8 fill);
 //EraseThing only works on non-polymorphic types. On polymorphs it also  kills the vtable!
 #define EraseThing(thing) fillObject(thing, sizeof(thing), 0);
 
-/** accessible portions of microcontroller startup code:
-   note different order (and type!) of args than std C library memcpy. */
+/** note different order (and type!) of args than std C library memcpy. */
 void memory_copy(const void *source, void *target, void *sourceEnd);
 /** @see memory_copy */
 void memory_set(void *target, void *targetEnd, u8 value);
@@ -244,10 +245,22 @@ inline u16 abs(int value){
 
 } //end extern C for assembly coded routines.
 
+//compile time math:
+
 /** @returns exponent that is highest power of 2 in the given number */
 template <unsigned powerof2,int count=-1> struct lb {
   enum {
-    exponent=  powerof2? lb<powerof2/2,count+1 >::exponent :count
+    exponent=  (powerof2>0) ? lb<powerof2/2,count+1 >::exponent : count
   };
 };
 
+/** this was needed as the compiler insisted on evaluating the 'true' term of the ternary even when its conditional was false */
+template<int count> struct lb<0,count> {
+  enum {
+    exponent= count
+  };
+};
+
+constexpr unsigned lb2(unsigned number){
+  return number? 1+lb2(number>>1):0;
+}

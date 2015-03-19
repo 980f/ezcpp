@@ -5,7 +5,7 @@
 
 
 /** @returns byte address argument as a pointer to that byte */
-__attribute__((always_inline))  //irritating during debug.
+__attribute__((always_inline))  //irritating to step through during debug.
 inline constexpr unsigned& atAddress(unsigned address){
   return *reinterpret_cast<unsigned *>(address);
 }
@@ -56,11 +56,11 @@ inline bool assignBit(unsigned &pattern, unsigned bitnumber,bool one){
 }
 
 
-/** use the following when only one of offset or width are constants */
+/** @returns splice of two values according to @param mask */
 constexpr unsigned int insertField(unsigned target, unsigned source, unsigned mask){
   return (target & ~mask) | (source & mask);
 }
-
+/** splices a value into another according to @param mask */
 inline unsigned mergeInto(volatile unsigned &target, unsigned source, unsigned mask){
   return target= insertField(target,source, mask);
 }

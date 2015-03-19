@@ -19,9 +19,9 @@ u32 muldivide(u32 arg, u32 num, u32 denom){
   return rate(arg*num,denom);
 }
 
-u32 log2Exponent(u32 number) WEAK;
-u32 log2Exponent(u32 number){
-  int exponent=0;
+int log2Exponent(u32 number) WEAK;
+int log2Exponent(u32 number){
+  int exponent=-1;
   while(number){
     ++exponent;
     number>>=1;
