@@ -55,6 +55,29 @@ inline bool assignBit(unsigned &pattern, unsigned bitnumber,bool one){
   return one;
 }
 
+struct BitReference {
+  unsigned &word;
+  unsigned mask;
+  /** initialize from a memory address and bit therein. If address isn't aligned then bitnumber must be constrained to stay within the same word*/
+  BitReference(unsigned memoryAddress,unsigned bitnumber):
+    word(atAddress(memoryAddress&~3)),
+    mask(1<<(31& ((memoryAddress<<3)+bitnumber))){
+    //now it is an aligned 32 bit entity
+  }
+  bool operator =(bool set)const{
+    if(set){
+      word|=mask;
+    } else {
+      word &=~mask;
+    }
+    return set;
+  }
+
+  operator bool()const{
+    return (word&mask)!=0;
+  }
+};
+
 
 /** @returns splice of two values according to @param mask */
 constexpr unsigned int insertField(unsigned target, unsigned source, unsigned mask){
