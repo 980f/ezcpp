@@ -141,7 +141,7 @@ int ilog10(u32 value);
 
 /** filtering in case we choose to optimize this */
 inline double pow10(int exponent){
-  return pow(10, exponent);
+  return pow(10.0D, exponent);
 }
 
 template <typename mathy> mathy squared(mathy x){
