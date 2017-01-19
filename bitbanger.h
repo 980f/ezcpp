@@ -6,8 +6,8 @@
 
 /** @returns byte address argument as a pointer to that byte */
 __attribute__((always_inline))  //irritating to step through during debug.
-inline constexpr unsigned& atAddress(unsigned address){
-  return *reinterpret_cast<unsigned *>(address);
+constexpr unsigned* atAddress(unsigned address){
+  return reinterpret_cast<unsigned *>(address);
 }
 
 constexpr bool bit(unsigned patter, unsigned bitnumber){
@@ -27,16 +27,24 @@ inline bool setBit(volatile unsigned &patter, unsigned bitnumber){
   return patter |= (1 << bitnumber);
 }
 
+inline bool setBit(volatile unsigned *patter, unsigned bitnumber){
+  return *patter |= (1 << bitnumber);
+}
+
 inline bool setBitAt(unsigned addr, unsigned bitnumber){
-  return setBit(atAddress(addr),bitnumber);
+  return setBit(*atAddress(addr),bitnumber);
 }
 
 inline bool clearBit(volatile unsigned &patter, unsigned bitnumber){
   return patter &= ~(1 << bitnumber);
 }
 
+inline bool clearBit(volatile unsigned *patter, unsigned bitnumber){
+  return *patter &= ~(1 << bitnumber);
+}
+
 inline bool clearBitAt(unsigned addr, unsigned bitnumber){
-  return clearBit(atAddress(addr),bitnumber);
+  return clearBit(*atAddress(addr),bitnumber);
 }
 
 
@@ -45,6 +53,13 @@ inline void raiseBit(volatile unsigned &address, unsigned  bit){
   clearBit(address, bit);
   setBit(address, bit);
 }
+
+/** ensure a 0:1 transition occurs on given bit. */
+inline void raiseBit(volatile unsigned *address, unsigned  bit){
+  clearBit(address, bit);
+  setBit(address, bit);
+}
+
 
 inline bool assignBit(unsigned &pattern, unsigned bitnumber,bool one){
   if(one){
@@ -60,7 +75,7 @@ struct BitReference {
   unsigned mask;
   /** initialize from a memory address and bit therein. If address isn't aligned then bitnumber must be constrained to stay within the same word*/
   BitReference(unsigned memoryAddress,unsigned bitnumber):
-    word(atAddress(memoryAddress&~3)),
+    word(*atAddress(memoryAddress&~3)),
     mask(1<<(31& ((memoryAddress<<3)+bitnumber))){
     //now it is an aligned 32 bit entity
   }
@@ -80,12 +95,18 @@ struct BitReference {
 
 
 /** @returns splice of two values according to @param mask */
-constexpr unsigned int insertField(unsigned target, unsigned source, unsigned mask){
+constexpr unsigned int insertField(unsigned &target, unsigned source, unsigned mask){
   return (target & ~mask) | (source & mask);
 }
+
 /** splices a value into another according to @param mask */
-inline unsigned mergeInto(volatile unsigned &target, unsigned source, unsigned mask){
+inline unsigned mergeInto(unsigned &target, unsigned source, unsigned mask){
   return target= insertField(target,source, mask);
+}
+
+/** splices a value into another according to @param mask */
+inline unsigned mergeInto(unsigned *target, unsigned source, unsigned mask){
+  return *target= insertField(*target,source, mask);
 }
 
 
@@ -120,9 +141,14 @@ constexpr unsigned int insertBits(unsigned target, unsigned source, unsigned lsb
   return insertField(target, source<<lsb ,bitMask(lsb,width));
 }
 
-inline unsigned mergeBits(volatile unsigned &target, unsigned source, unsigned lsb, unsigned width){
+inline unsigned mergeBits(unsigned &target, unsigned source, unsigned lsb, unsigned width){
   return mergeInto(target,source<<lsb,bitMask(lsb,width));
 }
+
+inline unsigned mergeBits(unsigned *target, unsigned source, unsigned lsb, unsigned width){
+  return mergeInto(target,source<<lsb,bitMask(lsb,width));
+}
+
 
 constexpr unsigned extractBits(unsigned source, unsigned lsb, unsigned width){
   return (source & bitMask(lsb,width)) >> lsb ;
