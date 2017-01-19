@@ -22,5 +22,5 @@ public: //accessors for the system timer
   void onDone(void);
 };
 
-Gropued A;
-Gropued B;
+//Gropued A;
+//Gropued B;
