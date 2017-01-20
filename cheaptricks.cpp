@@ -1,4 +1,4 @@
-#include "cheapTricks.h"
+#include "cheaptricks.h"
 #include "minimath.h"
 
 
