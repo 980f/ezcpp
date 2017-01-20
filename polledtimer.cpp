@@ -1,5 +1,6 @@
 #include "polledtimer.h"
 #include "tableofpointers.h"
+
 #pragma GCC diagnostic warning "-Wunused-variable"
 
 /**

@@ -30,6 +30,7 @@ public:
   }
 };
 
+
 /** automatic restart. If you are slow at polling it it may become done again while you are handling a previous done.
  * periodic event, with fairly low jitter. The period is fairly stable but the action routine can be delayed by other actions.
  */
@@ -58,3 +59,10 @@ public:
   virtual void onDone(void);
 
 };
+
+
+/** a server that will update all registered timers*/
+extern void PolledTimerServer(void);
+//registration is compile time, your object must be static to be party to this service.
+#define RegisterTimer(name) Register(PolledTimer,name)
+
