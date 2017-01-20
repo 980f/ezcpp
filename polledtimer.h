@@ -1,8 +1,7 @@
 #pragma once
 
 #include "eztypes.h"
-#include "bundler.h"
-#include "cheapTricks.h"
+#include "cheaptricks.h"
 
 /**
   * an isr will determine that the given time has expired,
@@ -10,13 +9,13 @@
   *
   * Cancellable retriggerable monostable.
   */
-class PolledTimer:public Bundler<PolledTimer> {
+class PolledTimer {
 protected:
   bool done;
   u32 systicksRemaining;
 public:
   PolledTimer(void);
-  virtual void restart(u32 ticks); //add to list if not present, never gets removed so don't add dynamic objects.
+  virtual void restart(u32 ticks);
   void restart(float seconds);//float (not double) as is often in time critical code.
   /** stops countdown without triggering onDone() */
   void freeze();
@@ -30,6 +29,15 @@ public:
     return done;
   }
 };
+
+
+//the table is of pointers, the pointers are const, the object pointed to is not.
+#define POLLEDTIMERTAG(prior) const __attribute((used, section(".table.PolledTimer." #prior )))
+
+//puts a timer in the list
+#define RegisterTimerAt(varble,priority) PolledTimer * POLLEDTIMERTAG(priority) PolledTimer##varble (&varble)
+#define RegisterTimer(varble) RegisterTimerAt(varble,5)
+
 
 /** automatic restart. If you are slow at polling it it may become done again while you are handling a previous done.
  * periodic event, with fairly low jitter. The period is fairly stable but the action routine can be delayed by other actions.

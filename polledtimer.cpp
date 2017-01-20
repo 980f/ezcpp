@@ -1,5 +1,7 @@
 #include "polledtimer.h"
 
+#pragma GCC diagnostic warning "-Wunused-variable"
+
 /**
   * an isr will determine that the given time has expired,
   * but the interested code will have to look at object to determine that the event occurred.
@@ -7,9 +9,16 @@
   * using 2 lists would make the isr faster, but all the restarts slower and restarts dominate first use.
   */
 
+//tagging the table, conveniently using the pointers to begin and end as the markers for the extent of the table
+PolledTimer * POLLEDTIMERTAG(0) beginTable(nullptr);
+//the tag numbers above and below are what define the range of priorites, They look like numbers but are text.
+PolledTimer * POLLEDTIMERTAG(9999999) endTable(nullptr);
+
 /** name required by systick.h. someday we'll get alias for static class member worked out */
 void PolledTimerServer(void) {
-  PolledTimer::forAll(&PolledTimer::check);
+  for(PolledTimer * const *scan=&beginTable;*(++scan);){
+    (*scan)->check();
+  }
 } /* onTick */
 
 
@@ -20,7 +29,6 @@ void PolledTimer::check(){
     }
   }
 }
-
 
 PolledTimer::PolledTimer(void){
   done = 1;
