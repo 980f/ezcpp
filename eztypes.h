@@ -41,6 +41,7 @@ typedef int64_t s64;
 
 
 //note: the linker is the agent that makes this happen. It failed in the past with Rowley scripts as they left out SORT(...)
+// creates section chunks like: .text._GLOBAL__sub_I.30000_startup and more importantly .init_array.30000 to call the previous which didn't actually need to be marked.
 //requires proper linker script:
 #define InitStep(k) __attribute__((init_priority(k)))
 //lower happens first. some dox say leave 0..101 for the compiler.
