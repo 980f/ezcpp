@@ -1,5 +1,5 @@
 #include "polledtimer.h"
-
+#include "tableofpointers.h"
 #pragma GCC diagnostic warning "-Wunused-variable"
 
 /**
@@ -9,15 +9,12 @@
   * using 2 lists would make the isr faster, but all the restarts slower and restarts dominate first use.
   */
 
-//tagging the table, conveniently using the pointers to begin and end as the markers for the extent of the table
-PolledTimer * POLLEDTIMERTAG(0) beginTable(nullptr);
-//the tag numbers above and below are what define the range of priorites, They look like numbers but are text.
-PolledTimer * POLLEDTIMERTAG(9999999) endTable(nullptr);
+MakeTable(PolledTimer);
 
 /** name required by systick.h. someday we'll get alias for static class member worked out */
 void PolledTimerServer(void) {
-  for(PolledTimer * const *scan=&beginTable;*(++scan);){
-    (*scan)->check();
+  ForTable(PolledTimer){
+    (*it)->check();
   }
 } /* onTick */
 

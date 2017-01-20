@@ -30,15 +30,6 @@ public:
   }
 };
 
-
-//the table is of pointers, the pointers are const, the object pointed to is not.
-#define POLLEDTIMERTAG(prior) const __attribute((used, section(".table.PolledTimer." #prior )))
-
-//puts a timer in the list
-#define RegisterTimerAt(varble,priority) PolledTimer * POLLEDTIMERTAG(priority) PolledTimer##varble (&varble)
-#define RegisterTimer(varble) RegisterTimerAt(varble,5)
-
-
 /** automatic restart. If you are slow at polling it it may become done again while you are handling a previous done.
  * periodic event, with fairly low jitter. The period is fairly stable but the action routine can be delayed by other actions.
  */
