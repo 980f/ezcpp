@@ -3,11 +3,13 @@
 
 /** concrete base class, extracted from template for out-of-line efficiency */
 class CircularPointerVoidly {
+  /* this can be any class that takes up just one byte of memory*/
+  typedef char Bytely;
 protected:
-  unsigned pointer;
-  unsigned end; // actually one past the end
+  Bytely *pointer;
+  Bytely *end; // actually one past the end
   unsigned step;
-  unsigned base;
+  Bytely *base;
 
   CircularPointerVoidly(void *base, unsigned step);
 

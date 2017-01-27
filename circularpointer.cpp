@@ -2,7 +2,7 @@
 
 
 CircularPointerVoidly::CircularPointerVoidly(void *base, unsigned step):
-  pointer(unsigned (base)),step(step),base(unsigned (base))
+  pointer(reinterpret_cast<Bytely*>(base)),step(step),base(reinterpret_cast<Bytely*>(base))
 {
   //end is TRASH. Its logic was painful to try to do in a constructor initialization expression.
 }
@@ -13,7 +13,7 @@ void CircularPointerVoidly::rewind(){
 
 void CircularPointerVoidly::move(int amount){
   if(pointer){
-    unsigned proposed = pointer + amount*step;
+    Bytely * proposed = pointer + amount*step;
     if(proposed >= end) {
       pointer -= end-base;
     } else if(proposed < base) {
