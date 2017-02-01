@@ -6,8 +6,14 @@ const double Infinity = std::numeric_limits<double>::infinity();
 const double Nan = std::numeric_limits<double>::quiet_NaN();
 #else
 //firmware platform didn't have a useful limits.h so ...
-const double Infinity=static_cast<const double>(0x7FFLL<<52);
-const double Nan=     static_cast<const double>(0x7FF8LL<<48);
+union punter{ long long i64; double d;};
+const double Infinity=punter{0x7FFLL<<52}.d;
+const double Nan=     punter{0x7FF8LL<<48}.d;
+
+union pfunter{ unsigned i32; float f;};
+const float fInfinity=pfunter{0xFFU<<27}.f;
+const float fNan=     pfunter{0xFF8U<<23}.f;
+
 #endif
 
 extern "C" {

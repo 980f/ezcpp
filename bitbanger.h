@@ -2,10 +2,9 @@
 #define BITBANGER_H
 
 /** bit and bitfield setting and getting.*/
-
-
+#define URGENTLY __attribute__((always_inline))
 /** @returns byte address argument as a pointer to that byte */
-__attribute__((always_inline))  //irritating to step through during debug.
+//URGENTLY //irritating to step through during debug.
 constexpr unsigned* atAddress(unsigned address){
   return reinterpret_cast<unsigned *>(address);
 }
@@ -76,7 +75,7 @@ struct BitReference {
   /** initialize from a memory address and bit therein. If address isn't aligned then bitnumber must be constrained to stay within the same word*/
   BitReference(unsigned memoryAddress,unsigned bitnumber):
     word(*atAddress(memoryAddress&~3)),
-    mask(1<<(31& ((memoryAddress<<3)+bitnumber))){
+    mask(1<<(31& ((memoryAddress<<3)|bitnumber))){
     //now it is an aligned 32 bit entity
   }
   bool operator =(bool set)const{
@@ -157,7 +156,7 @@ constexpr unsigned extractBits(unsigned source, unsigned lsb, unsigned width){
 
 
 /** for when the bits to pick are referenced multiple times and are compile time constant
- * trying to bind the address as a template arg runs afould of the address not being knowable at compile time*/
+ * trying to bind the item address as a template arg runs afould of the address not being knowable at compile time*/
 template <unsigned lsb, unsigned msb, bool msbIsWidth=false> class BitFielder {
   enum {
     mask = msbIsWidth?bitMask(lsb,msb):fieldMask(msb ,lsb) // aligned mask
@@ -168,7 +167,7 @@ public:
   }
 
   unsigned mergeInto(unsigned &item,unsigned value) const {
-    register unsigned merged= (item & ~mask) | ((value << lsb) & mask);
+    unsigned merged= (item & ~mask) | ((value << lsb) & mask);
     item=merged;
     return merged;
   }
@@ -176,7 +175,7 @@ public:
 
 
 /** Create this object around a field of an actual data item.
- * trying to bind the address as a template arg runs afould of the address not being knowable at compile time*/
+ * trying to bind the address as a template arg runs afoul of the address often not being knowable at compile time*/
 template <unsigned lsb, unsigned msb, bool msbIsWidth=false> class BitField: public BitFielder<lsb,msb,msbIsWidth> {
   unsigned &item;
 public:
@@ -186,10 +185,31 @@ public:
     return BitFielder<lsb,msb>::extract(item);
   }
   void operator =(unsigned value) const {
-    BitFielder<lsb,msb>mergeInto(item ,value );
+    BitFielder<lsb,msb>::mergeInto(item ,value );
   }
 };
 
+
+/** for hard coded absolute (known at compile time) address and bit number */
+template <unsigned memoryAddress,unsigned bitnumber> struct KnownBit {
+  enum {
+    word= memoryAddress&~3,
+    mask=(1<<(31& ((memoryAddress<<3)|bitnumber)))
+  };
+
+  bool operator =(bool set)const{
+    if(set){
+      *atAddress(word)|=mask;
+    } else {
+      *atAddress(word) &=~mask;
+    }
+    return set;
+  }
+
+  operator bool()const{
+    return (*atAddress(word)&mask)!=0;
+  }
+};
 
 
 ///////////////////////////////////////////
@@ -242,38 +262,5 @@ public:
     return (mask & varble) == 0;
   }
 };
-
-///trying to compact BitWad:
-// template <unsigned mask> struct BitMasker {
-
-// public:
-//  static bool exactly(unsigned varble,unsigned match){
-//    return (mask & varble) == (mask&match);//added mask to second term to allow for lazy programming
-//  }
-
-//  static bool all(unsigned varble){
-//    return (mask & varble) == mask;
-//  }
-
-//  static bool any(unsigned varble){
-//    return mask & varble;
-//  }
-
-//  static bool none(unsigned varble){
-//    return (mask & varble) == 0;
-//  }
-
-// };
-
-
-// template <unsigned ... list> constexpr unsigned maskBuilder();
-
-// template <unsigned pos> constexpr unsigned maskBuilder<pos>(){
-//  return 1<<pos;
-// }
-
-// template <unsigned pos,unsigned... poss> constexpr unsigned maskBuilder<pos,poss>{
-//  return maskBuilder<pos>() | maskBuilder<poss...>();
-// }
 
 #endif // BITBANGER_H

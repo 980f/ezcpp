@@ -2,11 +2,14 @@
 #define TABLEOFPOINTERS_H
 
 /* sometimes you want a bunch of items to be processed in a group, without them having to know of the existence of that group.
- * "Bunder" was a class that you could add as a base class and that would put all members of that class into a list.
- * That however required that all objects be mutable as the mechanism involved a linkedlist that is modified during construction.
+ * "Bundler" was a class that you could add as a base class and that would put all members of that class into a list.
+ * That however required that all objects be mutable as the mechanism involved a linkedlist that is modified during construction,
+ * which in turn required code to do that construction on every program start.
  *
  * This set of macro's lets you build a table in rom of pointers to members of the list, the objects can themselves be const (mostly).
  * Pointers are used so that polymorphic assemblages can be made.
+ *
+ * you will have to add a *(KEEP(.table.*)) to your linker script ROM section.
 */
 
 //the table is of pointers, the pointers are const, the object pointed to is not.
@@ -38,7 +41,7 @@ for(ClassK * const *it=&begin##ClassK##Table;*(++it);)
 
 //tagging the table, conveniently using the pointers to begin and end as the markers for the extent of the table
 //the extreme tag numbers below are what define the range of priorites, They look like numbers but are text.
-//note that the values in the table delimiters are irrelevent, they are handy for debug
+//note that the values in the table delimiters are irrelevent, but they are handy for debug
 #define MakeConstTable(Classy) \
 const Classy * TableTag(Classy,0) begin##Classy##sTable(reinterpret_cast<const Classy *const >(&begin##Classy##sTable+1));\
 const Classy * TableTag(Classy,9999999) end##Classy##sTable(reinterpret_cast<const Classy *const >(&end##Classy##sTable))
