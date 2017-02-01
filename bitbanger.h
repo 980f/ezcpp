@@ -213,8 +213,8 @@ template <unsigned memoryAddress,unsigned bitnumber> struct KnownBit {
 
 
 ///////////////////////////////////////////
-/// discontiguous bits, used for bitmmasking
-///
+/// a group of discontiguous bits, used for bitmmasking
+
 
 /** declarative part of 3 step template magic */
 template <unsigned ... list> struct BitWad;
@@ -223,43 +223,50 @@ template <unsigned ... list> struct BitWad;
 template <unsigned pos> struct BitWad<pos> {
   enum { mask = 1 << pos };
 public:
+  inline static unsigned extract(unsigned varble){
+    return (mask & varble);
+  }
 
   static bool exactly(unsigned varble, unsigned match){
-    return (mask & varble) == (mask & match); // added mask to second term to allow for lazy programming
+    return extract(varble) == extract(match); // added mask to second term to allow for lazy programming
   }
 
   static bool all(unsigned varble){
-    return (mask & varble) == mask;
+    return extract(varble) == mask;
   }
 
   static bool any(unsigned varble){
-    return mask & varble;
+    return extract(varble) != 0;
   }
 
   static bool none(unsigned varble){
-    return (mask & varble) == 0;
+    return extract(varble) == 0;
   }
 };
 
 /** assemble a bit field, without using stl. */
 template <unsigned pos, unsigned ... poss> struct BitWad<pos, poss ...> {
-  enum { mask = (1 << pos) | BitWad<poss ...>::mask };
+  enum { mask= BitWad<pos>::mask | BitWad<poss ...>::mask };
 
 public:
+  inline static unsigned extract(unsigned varble){
+    return (mask & varble);
+  }
+
   static bool exactly(unsigned varble, unsigned match){
-    return (mask & varble) == (mask & match); // added mask to second term to allow for lazy programming
+    return extract(varble) == extract(match); // added mask to second term to allow for lazy programming
   }
 
   static bool all(unsigned varble){
-    return (mask & varble) == mask;
+    return extract(varble) == mask;
   }
 
   static bool any(unsigned varble){
-    return mask & varble;
+    return extract(varble) != 0;
   }
 
   static bool none(unsigned varble){
-    return (mask & varble) == 0;
+    return extract(varble) == 0;
   }
 };
 
