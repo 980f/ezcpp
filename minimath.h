@@ -151,6 +151,8 @@ template <typename mathy> mathy squared(mathy x){
 /** n!/r! = n*(n-1)..*(n-r+1)
 */
 u32 Pnr(unsigned n, unsigned  r);
+u32 Cnr(unsigned n, unsigned  r);
+
 
 
 ////#define something as needed to kill any other min/max's as needed.
@@ -213,7 +215,7 @@ u16 fractionallyScale(u16 number, u16 fraction, u16 numbits);
  * want 1->0, 0->-1, 2^n->n (2^n + 2^k)->n
   * Note well that this will give -1 as the log of 0 rather than negative infinity, precheck the argument if you can't live with that.
   */
-int log2bExponent(u32 number);
+int log2Exponent(u32 number);
 
 /** @returns eff * 2^pow2  where pow2 is signed. This can be done rapidly via bitfiddling*/
 float shiftScale(float eff, int pow2);
