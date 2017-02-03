@@ -1,18 +1,20 @@
 #ifndef TABLEOFPOINTERS_H
 #define TABLEOFPOINTERS_H
 
-/* sometimes you want a bunch of items to be processed in a group, without them having to know of the existence of that group.
+/* sometimes you want a bunch of items to be processed in a group, without some place having to know of the existence of all those members.
+ * IE the members can all be private to their own modules, they don't need to be known by some special module like the one with main().
  * "Bundler" was a class that you could add as a base class and that would put all members of that class into a list.
  * That however required that all objects be mutable as the mechanism involved a linkedlist that is modified during construction,
  * which in turn required code to do that construction on every program start.
  *
- * This set of macro's lets you build a table in rom of pointers to members of the list, the objects can themselves be const (mostly).
- * Pointers are used so that polymorphic assemblages can be made.
+ * This set of macro's lets you build a table in rom of pointers to members of the list, the objects can themselves be const (insome variants of the mechanism).
+ * There are a few variants on the theme depending upon whether the table is const objects, pointers to objects.
  *
  * you will have to add a *(KEEP(.table.*)) to your linker script ROM section.
+ * (The addition of the 'used' attribute below may have made the KEEP moot)
 */
 
-//the table is of pointers, the pointers are const, the object pointed to is not.
+//Table of pointers, the pointers are const, the object pointed to is not.
 #define TableTag(ClassT,prior) const __attribute((used, section(".table." #ClassT "." #prior )))
 
 //puts a thing in the list
@@ -50,7 +52,7 @@ const Classy * TableTag(Classy,9999999) end##Classy##sTable(reinterpret_cast<con
 for(const Classy *it=begin##Classy##sTable;it<end##Classy##sTable;++it)
 
 /////////////////////////////
-/* needed this variant for a table of function pointers.
+/* needed this variant for a table of function pointers, which have an inherent constness that can't be explicitly declared.
 */
 #define MakeRefAt(Classy,varble,priority) const Classy ObjectTag(Classy,priority) RefTo##varble (varble)
 #define MakeRef(Classy,varble) MakeRefAt(Classy,varble,5)

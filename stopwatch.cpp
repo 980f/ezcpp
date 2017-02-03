@@ -1,50 +1,52 @@
 #include "stopwatch.h"
-#include "cheaptricks.h"
 
-__time_t StopWatch::epoch = 0;
+#include "cheaptricks.h"  //flagged
 
-double StopWatch::asSeconds(const timespec &ts){
-  double seconds(ts.tv_sec - epoch);//reduce to retain ns precision in addition below.
-  return seconds + 1e-9 * ts.tv_nsec;
+#include "systick.h"
+using namespace SystemTimer;
+
+void readit(TimeValue &ts){
+  ts=snapLongTime();
 }
 
-void StopWatch::readit(timespec &ts){
-  clock_gettime(CLOCK_something,&ts);
+double StopWatch::asSeconds(const TimeValue ts){
+  return secondsForLongTime(ts);
 }
 
-StopWatch::StopWatch(bool beRunning,bool realElseProcess) :
-  CLOCK_something(realElseProcess ? CLOCK_MONOTONIC : CLOCK_THREAD_CPUTIME_ID){
+StopWatchCore::StopWatchCore(bool beRunning,bool /*realElseProcess*/){
   readit(started);
-  if(epoch==0) {//once per application start
-    epoch = started.tv_sec;
-  }
   stopped = started;
   running = beRunning;
 }
 
-double StopWatch::roll(double *absolutely){
-  double retval = elapsed(absolutely);//must be running to roll.
-  if(running) {
-    started = stopped;//#do NOT start(), want to read the clock just once with each roll.
-  }
-  return retval;
-}
-
-void StopWatch::start(){
+void StopWatchCore::start(){
   readit(started);
   running = true;
 }
 
-void StopWatch::stop(){
+void StopWatchCore::stop(){
   if(flagged(running)) {
     readit(stopped);
   }
 }
 
-bool StopWatch::isRunning() const {
+TimeValue StopWatchCore::peek(bool andRoll){
+  if(running){
+    readit(stopped);
+  }
+  TimeValue elapsed=started-stopped;
+
+  if(andRoll){
+    started=stopped;
+  }
+  return elapsed;
+}
+
+bool StopWatchCore::isRunning() const {
   return running;
 }
 
+/////////////////////
 double StopWatch::absolute(){
   if(running) {
     readit(stopped);
@@ -53,13 +55,19 @@ double StopWatch::absolute(){
 }
 
 double StopWatch::elapsed(double *absolutely){
-  double diff = absolute();
+  TimeValue delta=peek(false);
   if(absolutely) {
-    *absolutely = diff;
+    *absolutely = asSeconds(stopped);
   }
-  diff -= asSeconds(started);
-  if(diff<0) {//clock rolled over
-    diff += 0.0;//todo:1 proper value before 2032 happens
-  }
-  return diff;
+  //todo: if delta<0 ....
+  return asSeconds(delta);
 } // StopWatch::elapsed
+
+
+double StopWatch::roll(double *absolutely){
+  TimeValue delta=peek(true);
+  if(absolutely) {
+    *absolutely = asSeconds(stopped);
+  }
+  return asSeconds(delta);
+}
