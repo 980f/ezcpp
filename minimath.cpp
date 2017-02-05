@@ -11,9 +11,8 @@ const double Infinity=punter{0x7FFLL<<52}.d;
 const double Nan=     punter{0x7FF8LL<<48}.d;
 
 union pfunter{ unsigned i32; float f;};
-const float fInfinity=pfunter{0xFFU<<27}.f;
-const float fNan=     pfunter{0xFF8U<<23}.f;
-
+const float fInfinity=pfunter{0xFFU<<23}.f;
+const float fNan=     pfunter{0x1FFU<<22}.f;
 #endif
 
 extern "C" {

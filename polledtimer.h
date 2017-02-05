@@ -3,26 +3,30 @@
 #include "eztypes.h"
 #include "cheaptricks.h"
 
+/** marker class for timing services */
+typedef u32 Ticks;
 /**
-  * an isr will determine that the given time has expired,
-  * but the interested code will have to look at object to determine that the event occurred.
+  * an isr will determine that the given time has expired, setting the done bit.
+  * but the interested code will have to look at object to determine that the event occurred OR
+  *  you will have to derive a class and overload onDone().
   *
-  * Cancellable retriggerable monostable.
   */
+
+
 class PolledTimer {
 protected:
   bool done;
-  u32 systicksRemaining;
+  Ticks systicksRemaining;
 public:
   PolledTimer(void);
-  virtual void restart(u32 ticks);
+  virtual void restart(Ticks ticks);
   void restart(float seconds);//float (not double) as is often in time critical code.
   /** stops countdown without triggering onDone() */
   void freeze();
   //what the timer isr calls:
   void check(void);
   /** called when systicksRemaining goes to 0.
-   * Overload to have something done within the timer interrupt service routine */
+   * Overload to have something done <B>within</B> the timer interrupt service routine */
   virtual void onDone(void);
   /** @returns whether this is no longer counting */
   inline bool isDone() const{
@@ -36,7 +40,7 @@ public:
  */
 class CyclicTimer : public PolledTimer {
 protected:
-  u32 period;
+  Ticks period;
   u32 fired;
 public:
   bool hasFired(void);
@@ -50,7 +54,7 @@ public:
     PolledTimer::restart(period);
   }
 
-  void restart(u32 ticks){
+  void restart(Ticks ticks){
     PolledTimer::restart(period = ticks);
   }
 

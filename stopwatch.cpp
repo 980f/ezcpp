@@ -2,6 +2,17 @@
 
 #include "cheaptricks.h"  //flagged
 
+#ifdef ARDUINO
+void readit(TimeValue &ts){
+  ts=millis();
+}
+
+double StopWatch::asSeconds(const TimeValue ts){
+  return (ts)*1000;//arduino hardcoded to millisecond.
+}
+
+#else
+
 #include "systick.h"
 using namespace SystemTimer;
 
@@ -12,6 +23,8 @@ void readit(TimeValue &ts){
 double StopWatch::asSeconds(const TimeValue ts){
   return secondsForLongTime(ts);
 }
+
+#endif
 
 StopWatchCore::StopWatchCore(bool beRunning,bool /*realElseProcess*/){
   readit(started);

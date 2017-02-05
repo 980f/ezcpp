@@ -12,7 +12,7 @@ struct Boolish {
 
 /** on/off thing which is not changed while it alters some other boolean thing */
 struct BoolishRef {
-  //do NOT add a virtual destructor, it casues linker headaches.
+  //do NOT add a virtual destructor, it causes linker headaches.
   //The cost of not being able to delete one of these without getting to its concrete class is worth this limitation.
   /** @returns argument after setting the value */
   virtual bool operator =(bool)const=0;
