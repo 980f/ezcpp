@@ -22,6 +22,18 @@ struct BoolishRef {
   }
 };
 
+/** a const-able reference to a non-const bool. */
+class BoolRef: public BoolishRef {
+  bool &ref;
+public:
+  BoolRef(bool &ref):ref(ref){}
+  bool operator =(bool value)const override{
+    return ref=value;
+  }
+  operator bool()const override {
+    return ref;
+  }
+};
 
 /** for when the read can't afford to regenerate what was last written */
 class CachedBoolish: public Boolish {

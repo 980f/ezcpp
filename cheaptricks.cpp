@@ -1,8 +1,6 @@
 #include "cheaptricks.h"
 #include "minimath.h"
 
-
-
 bool isPresent(const char *flags, const char flag){
   int badStringLimiter = 26; //in case string pointer is garbage we don't want to read all of ram
 
