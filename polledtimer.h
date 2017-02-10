@@ -43,6 +43,12 @@ protected:
   Ticks period;
   u32 fired;
 public:
+  CyclicTimer(Ticks period,bool andStart=false):period(period){
+    if(andStart){
+      retrigger();
+    }
+  }
+
   bool hasFired(void);
 
   operator bool (void){

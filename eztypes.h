@@ -42,7 +42,7 @@ typedef int64_t s64;
 //a function suitable for handling interrupts:
 typedef void (*Handler)(void);
 
-//note: the linker is the agent that makes this happen. It failed in the past with Rowley scripts as they left out SORT(...)
+//note: the linker is the agent that makes this happen. It fails if your linker script leaves out SORT(...)
 // creates section chunks like: .text._GLOBAL__sub_I.30000_startup and more importantly .init_array.30000 to call the previous which didn't actually need to be marked.
 //requires proper linker script:
 #define InitStep(k) __attribute__((init_priority(k)))
@@ -51,7 +51,9 @@ typedef void (*Handler)(void);
 #define InitUserLibrary 20000
 #define InitApplication 30000
 
+#ifndef WEAK
 #define WEAK __attribute__((weak))
+#endif
 
 #if __linux__
 #define NAKED

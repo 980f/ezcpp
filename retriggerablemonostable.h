@@ -4,11 +4,10 @@
 #include "polledtimer.h"
 #include "boolish.h"
 class RetriggerableMonostable : public PolledTimer, public Boolish {
-
-  Boolish &Q;
+  const BoolishRef &Q;//so many of our Boolishnesses are const'ed we make this class work with them, will have to proxy around constness to use with assignable Bools.
   Ticks period;
 public:
-  RetriggerableMonostable(Boolish &output, Ticks ticks = 0);
+  RetriggerableMonostable(const BoolishRef &output, Ticks ticks = 0);
   /** turn the bit on, start timer*/
   void trigger();
 

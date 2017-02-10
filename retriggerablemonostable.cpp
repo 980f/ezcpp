@@ -1,6 +1,6 @@
 #include "retriggerablemonostable.h"
 
-RetriggerableMonostable::RetriggerableMonostable(Boolish &output, Ticks ticks) :
+RetriggerableMonostable::RetriggerableMonostable(const BoolishRef &output, Ticks ticks) :
   Q(output),period(ticks){
 
 }
