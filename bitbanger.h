@@ -156,14 +156,20 @@ constexpr unsigned extractBits(unsigned source, unsigned lsb, unsigned width){
 
 
 /** for when the bits to pick are referenced multiple times and are compile time constant
- * trying to bind the item address as a template arg runs afould of the address not being knowable at compile time*/
-template <unsigned lsb, unsigned msb, bool msbIsWidth=false> class BitFielder {
+ * trying to bind the item address as a template arg runs afoul of the address not being knowable at compile time.
+ * while it is tempting to have a default of 1 for msb/width field, that is prone to users walking away from a partially edited field.
+*/
+template <unsigned lsb, unsigned msb, bool msbIsWidth=true> class BitFielder {
   enum {
     mask = msbIsWidth?bitMask(lsb,msb):fieldMask(msb ,lsb) // aligned mask
   };
 public:
   unsigned extract(unsigned &item) const {
     return (item & mask) >> lsb;
+  }
+
+  unsigned operator ()(unsigned &&item)const{
+    return extract(item);
   }
 
   unsigned mergeInto(unsigned &item,unsigned value) const {
@@ -173,6 +179,28 @@ public:
   }
 };
 
+template <unsigned lsb> class BitPicker {
+  enum {
+    mask = bitMask(lsb) // aligned mask
+  };
+public:
+  unsigned extract(unsigned &item) const {
+    return (item & mask) >> lsb;
+  }
+
+  unsigned operator ()(unsigned &&item)const{
+    return extract(item);
+  }
+
+  bool operator()(unsigned &word,bool set)const{
+    if(set){
+      word|=mask;
+    } else {
+      word &=~mask;
+    }
+    return set;
+  }
+};
 
 /** Create this object around a field of an actual data item.
  * trying to bind the address as a template arg runs afoul of the address often not being knowable at compile time*/
