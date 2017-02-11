@@ -46,5 +46,17 @@ public:
   virtual operator bool();
 };
 
+/** creating one of these set the bit (to @param polarity) deleting it (typically automatic at end of scope) clears the bit. */
+template <const BoolishRef &lockbit,bool polarity=1> struct LockBit {
+
+  LockBit(){
+    lockbit=polarity;
+  }
+
+  ~LockBit(){
+    lockbit=!polarity;;
+  }
+};
+
 
 #endif // BOOLISH_H

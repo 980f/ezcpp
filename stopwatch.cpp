@@ -3,6 +3,8 @@
 #include "cheaptricks.h"  //flagged
 
 #ifdef ARDUINO
+
+extern TimeValue millis();
 void readit(TimeValue &ts){
   ts=millis();
 }
