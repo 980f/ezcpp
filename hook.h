@@ -48,6 +48,30 @@ template<typename ... Args> class Hook {
 
 };
 
+/** like hook but only runs once. Adds boolean to precheck if it will do something, to avoid building an expensive argument list if it won't be needed. */
+template<typename ... Args> class HookOnce {
+  typedef void (*Pointer)(Args ...);
+  Pointer pointer;
+ public:
+  HookOnce(Pointer fn=nullptr):pointer(fn){}
+
+  /** @returns previous value so that a hook can be 'borrowed' */
+  Pointer operator =(Pointer fn){
+    Pointer was=pointer;
+    pointer=fn;
+    return was;
+  }
+
+  void operator () (Args ... args){
+    if(pointer){
+      Pointer preclear=pointer;
+      pointer=nullptr;//this makes it run once.
+      //By clearing the pointer before invoking it the invoked function can set a pointer to handle the next event.
+      (*preclear)(args ...);
+    }
+  }
+
+};
 
 //todo: equivalent of sigc hideReturn() and whatever they called supplyReturn()
 

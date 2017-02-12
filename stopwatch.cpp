@@ -13,8 +13,16 @@ double StopWatch::asSeconds(const TimeValue ts){
   return (ts)*1000;//arduino hardcoded to millisecond.
 }
 
-#else
+#elif defined(__linux__)
+void readit(TimeValue &){
+//  ts=snapLongTime();
+}
 
+double StopWatch::asSeconds(const TimeValue ){
+//  return secondsForLongTime(ts);
+}
+
+#else
 #include "systick.h"
 using namespace SystemTimer;
 
