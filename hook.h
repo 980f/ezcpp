@@ -19,7 +19,7 @@ protected:
     return was;
   }
 
-  RetType operator () (Args ... args){
+  RetType operator () (Args ... args)const{
     if(pointer){
       return (*pointer)(args ...);
     } else {
