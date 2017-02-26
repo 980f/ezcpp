@@ -3,10 +3,11 @@
 
 /** allow on/off things to be passed around */
 struct Boolish {
-  //do NOT add a virtual destructor, it casues linker headaches.
+  //do NOT add a virtual destructor, it causes linker headaches.
   //The cost of not being able to delete one of these without getting to its concrete class is worth this limitation.
   /** @returns argument after setting the value */
   virtual bool operator =(bool)=0;
+  /** @returns a boolean related to the object */
   virtual operator bool()=0;
 };
 
