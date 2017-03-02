@@ -14,7 +14,7 @@ typedef u32 Ticks;
 
 class PolledTimer {
 protected:
-  bool done;
+  bool running; //changed from 'done' to 'running' so that we can init via joint ram clear rather than init code.
   Ticks systicksRemaining;
 public:
   PolledTimer(void);
@@ -29,7 +29,7 @@ public:
   virtual void onDone(void);
   /** @returns whether this is no longer counting */
   inline bool isDone() const{
-    return done;
+    return !running;
   }
 };
 
