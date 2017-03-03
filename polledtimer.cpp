@@ -21,7 +21,7 @@ void PolledTimerServer(void) {
 
 
 void PolledTimer::check(){
-  if(!done){
+  if(running){
     if(--systicksRemaining==0){
       onDone();
     }
@@ -29,21 +29,21 @@ void PolledTimer::check(){
 }
 
 PolledTimer::PolledTimer(void){
-  done = 1;
+  running = 0;
   systicksRemaining = 0;
 }
 
 /** typically this is overloaded if latency is important.*/
 void PolledTimer::onDone(void){
-  done = true;
+  running = 0;
 }
 
 void PolledTimer::restart(u32 value){
   systicksRemaining = value + 1; //to ensure minimum wait even if tick fires while we are in this code.
   if(value > 0) {//# leave expanded for debug
-    done = 0; //this makes this retriggerable
+    running = 1; //this makes this retriggerable
   } else { //negative waits are instantly done.
-    done = 1;
+    running = 0;
     //this is a failure to start so we don't call the onDone..
   }
 } /* restart */
@@ -56,7 +56,7 @@ void PolledTimer::restart(float seconds){
 }
 
 void PolledTimer::freeze(){
-  done=1;//precludes isr touching remaining time, and onDone doesn't get called.
+  running = 0;//precludes isr touching remaining time, and onDone doesn't get called.
 }
 
 ////////////////////////////

@@ -5,17 +5,16 @@
 
 /** marker class for timing services */
 typedef u32 Ticks;
-/**
+/** shared timer services. 
   * an isr will determine that the given time has expired, setting the done bit.
-  * but the interested code will have to look at object to determine that the event occurred OR
-  *  you will have to derive a class and overload onDone().
-  *
+  * but the interested code will have to look at each object to determine that the event occurred OR
+  * will have to derive a class and overload onDone().
   */
 
 
 class PolledTimer {
 protected:
-  bool done;
+  bool running; //changed from 'done' to 'running' so that we can init via joint ram clear rather than init code.
   Ticks systicksRemaining;
 public:
   PolledTimer(void);
@@ -30,7 +29,7 @@ public:
   virtual void onDone(void);
   /** @returns whether this is no longer counting */
   inline bool isDone() const{
-    return done;
+    return !running;
   }
 };
 
@@ -71,7 +70,8 @@ public:
 };
 
 
-/** a server that will update all registered timers*/
+/** a server that will update all registered timers.
+ * You must arrange for it to get called with each tick */
 extern void PolledTimerServer(void);
 //registration is compile time, your object must be static to be party to this service.
 #define RegisterTimer(name) Register(PolledTimer,name)

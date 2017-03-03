@@ -1,14 +1,16 @@
 #ifndef BOOLISH_H
 #define BOOLISH_H
 
-/** allow on/off things to be passed around */
+/** allow on/off things to be passed around. This varitaion is modifiable. see BoolishRef for things that can be const even though they can be assigned to */
 struct Boolish {
-  //do NOT add a virtual destructor, it casues linker headaches.
+  //do NOT add a virtual destructor, it causes linker headaches.
   //The cost of not being able to delete one of these without getting to its concrete class is worth this limitation.
   /** @returns argument after setting the value */
   virtual bool operator =(bool)=0;
+  /** @returns a boolean related to the object */
   virtual operator bool()const=0;
-   virtual void toggle(){
+  /** changes state of the boolean */
+  virtual void toggle(){
     this->operator=(1-bool(*this));
   }
 };

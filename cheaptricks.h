@@ -5,8 +5,6 @@
 /** @returns whether @param flag is in the set @param flags. */
 bool isPresent(const char *flags, const char flag);
 
-/** @see template of same name */
-bool changed(double&target, double newvalue);
 
 /** compares @param target to @param newvalue, @returns whether the previous value was different and if so assigns that value to the target.
  * the goal is for this to be an atomic operation on any truly multi-threaded system. */
@@ -19,6 +17,9 @@ template <typename Scalar> bool changed(Scalar&target, Scalar newvalue){
     return false;
   }
 }
+
+/** @see template of same name. This instantiation does an 'nearly equal' compare */
+bool changed(double&target, double newvalue);
 
 /** clear a variable on block exit, regardless of how the exit happens, including exceptions */
 template <typename Scalar> class ClearOnExit {
@@ -62,10 +63,9 @@ template <typename Scalar> Scalar postAssign(Scalar&varb, Scalar value){
   return was;
 }
 
-/** form of ClearOnExit for use in a return statement: */
-template <typename Scalar> Scalar flagged(Scalar&varb) ISRISH;
 
 /** for test and clear, may eventually wrap atomic operation */
+template <typename Scalar> Scalar flagged(Scalar&varb) ISRISH;
 template <typename Scalar> Scalar flagged(Scalar&varb) {
   Scalar was = varb;
   varb = 0;
