@@ -9,8 +9,14 @@ typedef uint8_t u8;
 #define U8S(plaincharstar) (reinterpret_cast <const u8 *> (plaincharstar))
 #define U8Z(u8star) (reinterpret_cast <const char *> (u8star))
 
+#ifndef __USBAPI__  //duplicate def with arduino USB libs
 typedef uint16_t u16;
+#endif
+//the leonardo usbapi.h defines this as well as u16 while sam version only defines u16. <sigh/>
+#if !(defined(__USBAPI__) && defined(ARDUINO_ARCH_AVR))
 typedef uint32_t u32;
+#endif
+
 typedef uint64_t u64;
 
 typedef int8_t s8;

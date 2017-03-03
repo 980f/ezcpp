@@ -5,6 +5,6 @@ bool CachedBoolish::operator =(bool on){
   return on;//in case this is a pin and the pin is external not tracking what we write. IE this return is defined to be a pass through.
 }
 
-CachedBoolish::operator bool(){
+CachedBoolish::operator bool()const {
   return bit;
 }

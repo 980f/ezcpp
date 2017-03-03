@@ -28,7 +28,7 @@ public:
 
   /** @returns whether this guy turned the Q on, but hasn't turned it off.
    * This is not the same thing as the Q actually being on.*/
-  virtual operator bool() override {
+  virtual operator bool() const override {
     return !PolledTimer::isDone();
   }
 

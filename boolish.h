@@ -7,7 +7,10 @@ struct Boolish {
   //The cost of not being able to delete one of these without getting to its concrete class is worth this limitation.
   /** @returns argument after setting the value */
   virtual bool operator =(bool)=0;
-  virtual operator bool()=0;
+  virtual operator bool()const=0;
+   virtual void toggle(){
+    this->operator=(1-bool(*this));
+  }
 };
 
 /** on/off thing which is not changed while it alters some other boolean thing */
@@ -43,7 +46,7 @@ public:
   //The cost of not being able to delete one of these without getting to its concrete class is worth this limitation.
   /** @see Boolish::operator= */
   virtual bool operator =(bool on);
-  virtual operator bool();
+  virtual operator bool()const;
 };
 
 /** creating one of these set the bit (to @param polarity) deleting it (typically automatic at end of scope) clears the bit. */
