@@ -28,8 +28,8 @@ typedef int64_t s64;
 #define pun(type, lvalue) (*reinterpret_cast <type *> (&(lvalue)))
 
 /**for when you want to live dangerously.
- * We use the convention that all references have been confirmed non-null.
- * only use this when you are feeding an &(expression) */
+   We use the convention that all references have been confirmed non-null.
+   only use this when you are feeding an &(expression) */
 #define NULLREFERENCE(type) (*reinterpret_cast <type *> (0))
 
 //lord it would be nice if C would make a standard operator for this:
