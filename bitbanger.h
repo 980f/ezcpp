@@ -1,6 +1,11 @@
 #ifndef BITBANGER_H
 #define BITBANGER_H
 
+//Arduino has macros where we have inline functions, ours are safer.
+#ifdef bit
+#undef bit
+#endif
+
 /** bit and bitfield setting and getting.*/
 #define URGENTLY __attribute__((always_inline))
 /** @returns byte address argument as a pointer to that byte */
@@ -70,25 +75,25 @@ inline bool assignBit(unsigned &pattern, unsigned bitnumber,bool one){
 }
 
 struct BitReference {
-  unsigned &word;
+  unsigned &whole;//#renamed due to Arduino conflict, they have a global 'word' macro.
   unsigned mask;
   /** initialize from a memory address and bit therein. If address isn't aligned then bitnumber must be constrained to stay within the same word*/
   BitReference(unsigned memoryAddress,unsigned bitnumber):
-    word(*atAddress(memoryAddress&~3)),
+    whole(*atAddress(memoryAddress&~3)),
     mask(1<<(31& ((memoryAddress<<3)|bitnumber))){
     //now it is an aligned 32 bit entity
   }
   bool operator =(bool set)const{
     if(set){
-      word|=mask;
+      whole|=mask;
     } else {
-      word &=~mask;
+      whole &=~mask;
     }
     return set;
   }
 
   operator bool()const{
-    return (word&mask)!=0;
+    return (whole&mask)!=0;
   }
 };
 
