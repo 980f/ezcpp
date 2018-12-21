@@ -2,8 +2,19 @@
 #define BITBANGER_H
 
 //Arduino has macros where we have inline functions, ours are safer.
-#ifdef bit
+#ifdef ARDUINO
 #undef bit
+#undef bitClear
+#undef bitRead
+#undef bitSet
+#undef bitWrite
+
+#define bit(n)         (1<<(n))
+#define bitClear(x,n) clearBit(x,n)
+#define bitRead(x,n)  bit(x,n)
+#define bitSet(x,n)   setBit(x,n)
+#define bitWrite(x,n,v) assignBit(x,n,v)
+
 #endif
 
 /** bit and bitfield setting and getting.*/
@@ -14,7 +25,8 @@ constexpr unsigned* atAddress(unsigned address){
   return reinterpret_cast<unsigned *>(address);
 }
 
-constexpr bool bit(unsigned patter, unsigned bitnumber){
+/** graciously letting Arduino usurp our function name, will rewrite all 980F stuff to deal with it.*/
+constexpr bool bitFrom(unsigned patter, unsigned bitnumber){
   return (patter & (1 << bitnumber)) != 0;
 }
 
