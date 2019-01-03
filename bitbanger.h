@@ -1,7 +1,9 @@
-#ifndef BITBANGER_H
+#ifndef BITBANGER_H  //(C) 2017,2018 Andy Heilveil , github/980F
 #define BITBANGER_H
 
-//Arduino has macros where we have inline functions, ours are safer.
+/** bit and bitfield setting and getting.*/
+
+//Arduino has macros where we have inline functions, ours are safer and just as performant.
 #ifdef ARDUINO
 #undef bit
 #undef bitClear
@@ -17,10 +19,8 @@
 
 #endif
 
-/** bit and bitfield setting and getting.*/
-#define URGENTLY __attribute__((always_inline))
+
 /** @returns byte address argument as a pointer to that byte */
-//URGENTLY //irritating to step through during debug.
 constexpr unsigned* atAddress(unsigned address){
   return reinterpret_cast<unsigned *>(address);
 }
@@ -39,11 +39,11 @@ constexpr bool isEven(unsigned pattern){
   return ! isOdd(pattern);
 }
 
-inline bool setBit(volatile unsigned &patter, unsigned bitnumber){
+template<typename Scalar> bool setBit(volatile Scalar &patter, unsigned bitnumber){
   return patter |= (1 << bitnumber);
 }
 
-inline bool setBit(volatile unsigned *patter, unsigned bitnumber){
+template<typename Scalar> bool setBit(volatile Scalar *patter, unsigned bitnumber){
   return *patter |= (1 << bitnumber);
 }
 
@@ -51,11 +51,11 @@ inline bool setBitAt(unsigned addr, unsigned bitnumber){
   return setBit(*atAddress(addr),bitnumber);
 }
 
-inline bool clearBit(volatile unsigned &patter, unsigned bitnumber){
+template<typename Scalar> bool clearBit(volatile Scalar &patter, unsigned bitnumber){
   return patter &= ~(1 << bitnumber);
 }
 
-inline bool clearBit(volatile unsigned *patter, unsigned bitnumber){
+template<typename Scalar> bool clearBit(volatile Scalar *patter, unsigned bitnumber){
   return *patter &= ~(1 << bitnumber);
 }
 
@@ -77,7 +77,7 @@ inline void raiseBit(volatile unsigned *address, unsigned  bit){
 }
 
 
-inline bool assignBit(unsigned &pattern, unsigned bitnumber,bool one){
+template<typename Scalar> bool assignBit(Scalar &pattern, unsigned bitnumber,bool one){
   if(one){
     setBit(pattern,bitnumber);
   } else {
@@ -111,17 +111,17 @@ struct BitReference {
 
 
 /** @returns splice of two values according to @param mask */
-constexpr unsigned int insertField(unsigned &target, unsigned source, unsigned mask){
+template<typename Scalar> constexpr Scalar insertField(const Scalar &target, unsigned source, unsigned mask){
   return (target & ~mask) | (source & mask);
 }
 
 /** splices a value into another according to @param mask */
-inline unsigned mergeInto(unsigned &target, unsigned source, unsigned mask){
+template<typename Scalar> Scalar mergeInto(Scalar& target, unsigned source, unsigned mask){
   return target= insertField(target,source, mask);
 }
 
 /** splices a value into another according to @param mask */
-inline unsigned mergeInto(unsigned *target, unsigned source, unsigned mask){
+template<typename Scalar> Scalar mergeInto(Scalar*target, unsigned source, unsigned mask){
   return *target= insertField(*target,source, mask);
 }
 

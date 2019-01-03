@@ -18,12 +18,13 @@ inline int signabs(int&absolutatus) {
   return absolutatus ? 1 : 0;
 }
 
-inline int signum(int anint) {
-  if (anint < 0) {
-    return -1;
-  }
-  return anint ? 1 : 0;
-}
+//replaced with signof<>. Name was too popular with other math packages.
+//inline int signum(int anint) {
+//  if (anint < 0) {
+//    return -1;
+//  }
+//  return anint ? 1 : 0;
+//}
 
 //yet another filter to reconcile platform math.h issues. Make specializations per platform for performance.
 template <typename mathy> int signof(mathy x) {
@@ -58,18 +59,10 @@ inline u32 quanta(u32 num, u32 denom) {
   return (num + denom - 1) / denom;
 }
 
-/** protect against garbage in (divide by zero) note: 0/0 is 1*/
-inline double ratio(double num, double denom) {
+/** protect against garbage in (divide by zero) note: 0/0 is 0 */
+template <typename NumType,typename DenType=NumType>  double ratio(NumType num, DenType denom) {
   if (denom == 0) { //pathological case
-    return num; //attempt to make 0/0 be 1 gave us 1.0 cps for unmeasured spectra  may someday return signed inf.
-  }
-  return num / denom;
-}
-
-/** protect against garbage in (divide by zero) note: 0/0 is 1*/
-inline float ratio(float num, float denom) {
-  if (denom == 0) { //pathological case
-    return num == 0 ? 1 : 0; //may someday return signed inf.
+    return num; //attempt to make 0/0 be 1 gave 1 for ratio of unmeasured items, was not a good choice  may someday return signed inf.
   }
   return num / denom;
 }
@@ -81,7 +74,7 @@ inline bool isSignal(double d) {
   return d == Nan || isnan(d);
 }
 
-/** quantity of bins needed to hold num items at denom items per bin*/
+/** quantity of bins needed to hold num items at denom items per bin. @see quanta */
 inline u32 chunks(double num, double denom) {
   double _ratio = ratio(num, denom);
 
@@ -165,16 +158,9 @@ u32 Cnr(unsigned n, unsigned  r);
 //  }
 //}
 
-inline u32 min(u32 a, u32 b) {
-  if (a < b) {
-    return a;
-  } else {
-    return b;
-  }
-}
 //todo: see if compiler can use this for min of convertible types:
 template <typename S1, typename S2> S1 lesser(S1 a, S2 b) {
-  S1 b1 = S1(b); //so incomparable types gives us just one error.
+  S1 b1 = static_cast<S1>(b); //so incomparable types gives us just one error.
   if (a < b1) {
     return a;
   } else {
@@ -182,8 +168,9 @@ template <typename S1, typename S2> S1 lesser(S1 a, S2 b) {
   }
 }
 
+#undef max
 template <typename Scalar, typename S2> Scalar max(Scalar a, S2 b) {
-  Scalar bb = Scalar(b); //so incomparable types gives us just one error.
+  Scalar bb = static_cast<Scalar>(b); //so incomparable types gives us just one error.
   if (a > bb) {
     return a;
   } else {
