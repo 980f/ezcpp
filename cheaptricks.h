@@ -56,10 +56,24 @@ template <typename Scalar> class AssignOnExit {
     }
 };
 
+/** @return value, zeroes the source */
+template <typename Scalar> Scalar take(Scalar&varb) {
+  Scalar was = varb;
+  varb = 0;
+  return was;
+}
+
 /** form of AssignOnExit for use in a return statement: */
 template <typename Scalar> Scalar postAssign(Scalar&varb, Scalar value) {
   Scalar was = varb;
   varb = value;
+  return was;
+}
+
+/** form of AssignOnExit for use in a return statement: */
+template <typename Scalar,typename Similar> Scalar postAssign(Scalar&varb, Similar value) {
+  Scalar was = varb;
+  varb = Scalar(value);
   return was;
 }
 
