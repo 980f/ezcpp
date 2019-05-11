@@ -18,6 +18,18 @@ template <typename Scalar, typename Scalar2> bool changed(Scalar&target, Scalar2
   }
 }
 
+/** assigns newvlaue to target and returns -1,0, or 1 according to whether target was reduced,unchanged, or increased  */
+
+template <typename Scalar, typename Scalar2> int assigncmp(Scalar&target, Scalar2 &&newvalue) {
+  if (target != newvalue) {
+  	bool reduced = target > newvalue;
+    target = newvalue;
+    return reduced?-1:1;
+  } else {
+    return 0;
+  }
+}
+
 /** @see template of same name. This instantiation does an 'nearly equal' compare */
 bool changed(double&target, double &&newvalue);
 
