@@ -71,7 +71,7 @@ template <typename Scalar> class AssignOnExit {
 /** @return value, zeroes the source */
 template <typename Scalar> Scalar take(Scalar&varb) {
   Scalar was = varb;
-  varb = 0;
+  varb = Scalar(0);
   return was;
 }
 
