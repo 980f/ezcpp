@@ -1,6 +1,8 @@
 #pragma once
 
+//Arduino sloppiness made me remove this: 
 #include "eztypes.h"
+//#include <stdint.h>  //<cstdint> not available on some micro. c++ libs
 
 //portable nan etc. symbols, our compilers don't seem to agree on these guys, or the syntax is horrible.
 const extern double Infinity;
@@ -39,7 +41,7 @@ template <typename mathy> int signof(mathy x) {
 
 
 /** 'round to nearest' ratio of integers*/
-inline u32 rate(u32 num, u32 denom) {
+inline uint32_t rate(uint32_t num, uint32_t denom) {
   if (denom == 0) {
     return num == 0 ? 1 : 0; //pathological case
   }
@@ -52,7 +54,7 @@ inline int half(int sum) {
 }
 
 /** quantity of bins needed to hold num items at denom items per bin*/
-inline u32 quanta(u32 num, u32 denom) {
+inline uint32_t quanta(uint32_t num, uint32_t denom) {
   if (denom == 0) {
     return num == 0 ? 1 : 0; //pathological case
   }
@@ -75,11 +77,11 @@ inline bool isSignal(double d) {
 }
 
 /** quantity of bins needed to hold num items at denom items per bin. @see quanta */
-inline u32 chunks(double num, double denom) {
+inline uint32_t chunks(double num, double denom) {
   double _ratio = ratio(num, denom);
 
   if (_ratio >= 0) {
-    return u32(ceil(_ratio));
+    return uint32_t(ceil(_ratio));
   } else {
     return 0;
   }
@@ -130,7 +132,7 @@ template <typename floating> bool nearly(floating value, floating other, int bit
 
 /** @returns the integer part of the log base 10 of @param value.
    That is the number of decimal digits to the left of the radix point */
-int ilog10(u32 value);
+int ilog10(uint32_t value);
 
 /** filtering in case we choose to optimize this */
 inline double pow10(int exponent) {
@@ -143,13 +145,13 @@ template <typename mathy> mathy squared(mathy x) {
 
 /** n!/r! = n*(n-1)..*(n-r+1)
 */
-u32 Pnr(unsigned n, unsigned  r);
-u32 Cnr(unsigned n, unsigned  r);
+uint32_t Pnr(unsigned n, unsigned  r);
+uint32_t Cnr(unsigned n, unsigned  r);
 
 
 
 ////#define something as needed to kill any other min/max's as needed.
-//template adandoned as the firmware rev of gcc couldn't deal with u32 vs unsigned int, i.e. it type checked  before applying typedef's
+//template adandoned as the firmware rev of gcc couldn't deal with uint32_t vs unsigned int, i.e. it type checked  before applying typedef's
 //template <typename Scalar> Scalar min(Scalar a,Scalar b){
 //  if(a<b){
 //    return a;
@@ -190,32 +192,32 @@ extern "C" { //assembly coded in cortexm3.s, usually due to outrageously bad com
   void nanoSpin(unsigned ticks); //fast spinner, first used in soft I2C.
 
   /** @returns @param arg*num/denom rounded and overflow managed (internal 64 bit temps)  */
-  u32 muldivide(u32 arg, u32 num, u32 denom);
+  uint32_t muldivide(uint32_t arg, uint32_t num, uint32_t denom);
 
-  u16 saturated(unsigned quantity, double fractionThereof);
+  uint16_t saturated(unsigned quantity, double fractionThereof);
 
   //fraction is a fractional multiplier, with numbits stating how many fractional bits it has.
-  u16 fractionallyScale(u16 number, u16 fraction, u16 numbits);
+  uint16_t fractionallyScale(uint16_t number, uint16_t fraction, uint16_t numbits);
 
   /** this has waffled about a bit, differing by one in its return for various vintages.
      @returns value such that 1<<return is >= @param number.
      want 1->0, 0->-1, 2^n->n (2^n + 2^k)->n
       Note well that this will give -1 as the log of 0 rather than negative infinity, precheck the argument if you can't live with that.
   */
-  int log2Exponent(u32 number);
+  int log2Exponent(uint32_t number);
 
   /** @returns eff * 2^pow2  where pow2 is signed. This can be done rapidly via bitfiddling*/
   float shiftScale(float eff, int pow2);
 
-  double flog(u32 number);
-  double logRatio(u32 over, u32 under);
+  double flog(uint32_t number);
+  double logRatio(uint32_t over, uint32_t under);
 
-  u16 uround(float scaled);
-  s16 sround(float scaled);
+  uint16_t uround(float scaled);
+  int16_t sround(float scaled);
 
   /**NB: copyObject() and fillObject() can NOT be used with objects that contain polymorphic objects as they would copy the virtual function tables */
-  void copyObject(const void *source, void *target, u32 length);
-  void fillObject(void *target, u32 length, u8 fill);
+  void copyObject(const void *source, void *target, uint32_t length);
+  void fillObject(void *target, uint32_t length, u8 fill);
 
   //EraseThing only works on non-polymorphic types. On polymorphs it also  kills the vtable!
 #define EraseThing(thing) fillObject(thing, sizeof(thing), 0);
@@ -226,8 +228,8 @@ extern "C" { //assembly coded in cortexm3.s, usually due to outrageously bad com
   void memory_set(void *target, void *targetEnd, u8 value);
 
 #if 0 //  fixmelater //!defined( QT_CORE_LIB ) && !defined() //std lib's differ between pc and arm.
-  //the difference of two u16's should be a signed int. test your compiler.
-  inline u16 abs(int value) {
+  //the difference of two uint16_t's should be a signed int. test your compiler.
+  inline uint16_t abs(int value) {
     return value > 0 ? value : -value;
   }
 #endif
