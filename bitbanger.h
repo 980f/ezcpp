@@ -1,15 +1,32 @@
-#ifndef BITBANGER_H
+#ifndef BITBANGER_H  //(C) 2017,2018 Andy Heilveil , github/980F
 #define BITBANGER_H
 
 /** bit and bitfield setting and getting.*/
-#define URGENTLY __attribute__((always_inline))
+
+//Arduino has macros where we have inline functions, ours are safer and just as performant.
+#ifdef ARDUINO
+#undef bit
+#undef bitClear
+#undef bitRead
+#undef bitSet
+#undef bitWrite
+
+#define bit(n)         (1<<(n))
+#define bitClear(x,n) clearBit(x,n)
+#define bitRead(x,n)  bit(x,n)
+#define bitSet(x,n)   setBit(x,n)
+#define bitWrite(x,n,v) assignBit(x,n,v)
+
+#endif
+
+
 /** @returns byte address argument as a pointer to that byte */
-//URGENTLY //irritating to step through during debug.
 constexpr unsigned* atAddress(unsigned address){
   return reinterpret_cast<unsigned *>(address);
 }
 
-constexpr bool bit(unsigned patter, unsigned bitnumber){
+/** graciously letting Arduino usurp our function name, will rewrite all 980F stuff to deal with it.*/
+constexpr bool bitFrom(unsigned patter, unsigned bitnumber){
   return (patter & (1 << bitnumber)) != 0;
 }
 
@@ -22,11 +39,11 @@ constexpr bool isEven(unsigned pattern){
   return ! isOdd(pattern);
 }
 
-inline bool setBit(volatile unsigned &patter, unsigned bitnumber){
+template<typename Scalar> bool setBit(volatile Scalar &patter, unsigned bitnumber){
   return patter |= (1 << bitnumber);
 }
 
-inline bool setBit(volatile unsigned *patter, unsigned bitnumber){
+template<typename Scalar> bool setBit(volatile Scalar *patter, unsigned bitnumber){
   return *patter |= (1 << bitnumber);
 }
 
@@ -34,11 +51,11 @@ inline bool setBitAt(unsigned addr, unsigned bitnumber){
   return setBit(*atAddress(addr),bitnumber);
 }
 
-inline bool clearBit(volatile unsigned &patter, unsigned bitnumber){
+template<typename Scalar> bool clearBit(volatile Scalar &patter, unsigned bitnumber){
   return patter &= ~(1 << bitnumber);
 }
 
-inline bool clearBit(volatile unsigned *patter, unsigned bitnumber){
+template<typename Scalar> bool clearBit(volatile Scalar *patter, unsigned bitnumber){
   return *patter &= ~(1 << bitnumber);
 }
 
@@ -60,7 +77,7 @@ inline void raiseBit(volatile unsigned *address, unsigned  bit){
 }
 
 
-inline bool assignBit(unsigned &pattern, unsigned bitnumber,bool one){
+template<typename Scalar> bool assignBit(Scalar &pattern, unsigned bitnumber,bool one){
   if(one){
     setBit(pattern,bitnumber);
   } else {
@@ -70,41 +87,41 @@ inline bool assignBit(unsigned &pattern, unsigned bitnumber,bool one){
 }
 
 struct BitReference {
-  unsigned &word;
+  unsigned &whole;//#renamed due to Arduino conflict, they have a global 'word' macro.
   unsigned mask;
   /** initialize from a memory address and bit therein. If address isn't aligned then bitnumber must be constrained to stay within the same word*/
   BitReference(unsigned memoryAddress,unsigned bitnumber):
-    word(*atAddress(memoryAddress&~3)),
+    whole(*atAddress(memoryAddress&~3)),
     mask(1<<(31& ((memoryAddress<<3)|bitnumber))){
     //now it is an aligned 32 bit entity
   }
   bool operator =(bool set)const{
     if(set){
-      word|=mask;
+      whole|=mask;
     } else {
-      word &=~mask;
+      whole &=~mask;
     }
     return set;
   }
 
   operator bool()const{
-    return (word&mask)!=0;
+    return (whole&mask)!=0;
   }
 };
 
 
 /** @returns splice of two values according to @param mask */
-constexpr unsigned int insertField(unsigned &target, unsigned source, unsigned mask){
+template<typename Scalar> constexpr Scalar insertField(const Scalar &target, unsigned source, unsigned mask){
   return (target & ~mask) | (source & mask);
 }
 
 /** splices a value into another according to @param mask */
-inline unsigned mergeInto(unsigned &target, unsigned source, unsigned mask){
+template<typename Scalar> Scalar mergeInto(Scalar& target, unsigned source, unsigned mask){
   return target= insertField(target,source, mask);
 }
 
 /** splices a value into another according to @param mask */
-inline unsigned mergeInto(unsigned *target, unsigned source, unsigned mask){
+template<typename Scalar> Scalar mergeInto(Scalar*target, unsigned source, unsigned mask){
   return *target= insertField(*target,source, mask);
 }
 

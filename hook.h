@@ -1,6 +1,8 @@
 #ifndef HOOK_H
 #define HOOK_H
 
+#include "cheaptricks.h"
+
 ///** hook with a return value */
 //template<typename RetType, typename ... Args> class Hooker {
 //public:
@@ -101,8 +103,7 @@ public:
 
   void operator () (Args ... args){
     if(pointer){
-      Pointer preclear=pointer;
-      pointer=nullptr;//this makes it run once.
+      Pointer preclear=take(pointer);
       //By clearing the pointer before invoking it the invoked function can set a pointer to handle the next event.
       (*preclear)(args ...);
     }

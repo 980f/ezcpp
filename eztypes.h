@@ -9,6 +9,11 @@ typedef uint8_t u8;
 #define U8S(plaincharstar) (reinterpret_cast <const u8 *> (plaincharstar))
 #define U8Z(u8star) (reinterpret_cast <const char *> (u8star))
 
+//someone is screwing with the defines, some leonardo modules define USBAPI, some do not.
+#if defined(ARDUINO_AVR_LEONARDO)&&!defined(__USBAPI__)
+#define __USBAPI__ 1
+#endif
+
 #ifndef __USBAPI__  //duplicate def with arduino USB libs
 typedef uint16_t u16;
 #endif
@@ -28,8 +33,8 @@ typedef int64_t s64;
 #define pun(type, lvalue) (*reinterpret_cast <type *> (&(lvalue)))
 
 /**for when you want to live dangerously.
- * We use the convention that all references have been confirmed non-null.
- * only use this when you are feeding an &(expression) */
+   We use the convention that all references have been confirmed non-null.
+   only use this when you are feeding an &(expression) */
 #define NULLREFERENCE(type) (*reinterpret_cast <type *> (0))
 
 //lord it would be nice if C would make a standard operator for this:
