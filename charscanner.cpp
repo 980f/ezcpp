@@ -2,6 +2,7 @@
 #include "cstr.h"
 #include "char.h"
 #include "onexit.h"
+#include "cheaptricks.h"
 
 //this one is sharable, with care! You should never be calling wrap or clone on a reference.
 CharScanner CharScanner::Null;
