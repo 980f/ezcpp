@@ -192,6 +192,9 @@ public:
   }
 };
 
+/** BitPicker access a bit in a word that might not accept struct bit field manipulation.
+It is very much like BitFielder, but takes advantage of knowing that a single bit is involved allowing for explicit use of 'bool' in the interface.*/
+
 template <unsigned lsb> class BitPicker {
   enum {
     mask = bitMask(lsb) // aligned mask
