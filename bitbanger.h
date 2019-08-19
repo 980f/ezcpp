@@ -264,24 +264,29 @@ template <unsigned ... list> struct BitWad;
 template <unsigned pos> struct BitWad<pos> {
   enum { mask = 1 << pos };
 public:
-  inline static unsigned extract(unsigned varble){
+  inline static unsigned extract(unsigned varble)  {
     return (mask & varble);
   }
 
-  static bool exactly(unsigned varble, unsigned match){
+  static bool exactly(unsigned varble, unsigned match) {
     return extract(varble) == extract(match); // added mask to second term to allow for lazy programming
   }
 
-  static bool all(unsigned varble){
+  static bool all(unsigned varble) {
     return extract(varble) == mask;
   }
 
-  static bool any(unsigned varble){
+  static bool any(unsigned varble) {
     return extract(varble) != 0;
   }
 
-  static bool none(unsigned varble){
+  static bool none(unsigned varble) {
     return extract(varble) == 0;
+  }
+
+  /* place bit from packed into position. A separate operation merges that with target data */
+  static unsigned splatter(unsigned packed) {
+    return (packed&1)<<pos;
   }
 };
 
@@ -290,25 +295,36 @@ template <unsigned pos, unsigned ... poss> struct BitWad<pos, poss ...> {
   enum { mask= BitWad<pos>::mask | BitWad<poss ...>::mask };
 
 public:
-  inline static unsigned extract(unsigned varble){
+  inline static unsigned extract(unsigned varble) {
     return (mask & varble);
   }
 
-  static bool exactly(unsigned varble, unsigned match){
+  static bool exactly(unsigned varble, unsigned match) {
     return extract(varble) == extract(match); // added mask to second term to allow for lazy programming
   }
 
-  static bool all(unsigned varble){
+  static bool all(unsigned varble) {
     return extract(varble) == mask;
   }
 
-  static bool any(unsigned varble){
+  static bool any(unsigned varble) {
     return extract(varble) != 0;
   }
 
-  static bool none(unsigned varble){
+  static bool none(unsigned varble) {
     return extract(varble) == 0;
   }
+
+  static unsigned splatter(unsigned packed) {
+    return ((packed&1)<<pos)| BitWad<poss ...>::splatter(packed);
+  }
+
+  static void template<typename Scalar> Scalar mergeInto(Scalar& target,Scalar packed){
+    retur mergeInto(target, splatter(packed),mask);
+  }
+
 };
+
+
 
 #endif // BITBANGER_H
