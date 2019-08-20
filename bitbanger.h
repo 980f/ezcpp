@@ -95,17 +95,17 @@ struct BitReference {
     mask(1 << (31 & ((memoryAddress << 3) | bitnumber))) {
     //now it is an aligned 32 bit entity
   }
-  bool operator =(bool set)const {
-    if (set) {
-      whole |= mask;
+  bool operator =(bool set)const{ // NOLINT(misc-unconventional-assign-operator,cppcoreguidelines-c-copy-assignment-signature)
+    if(set){
+      whole|=mask;
     } else {
-      whole &= ~mask;
+      whole &=~mask;
     }
     return set;
   }
 
-  operator bool()const {
-    return (whole & mask) != 0;
+  operator bool()const{ // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
+    return (whole&mask)!=0;
   }
 };
 
@@ -173,8 +173,8 @@ constexpr unsigned extractBits(unsigned source, unsigned lsb, unsigned width) {
 
 
 /** for when the bits to pick are referenced multiple times and are compile time constant
-   trying to bind the item address as a template arg runs afoul of the address not being knowable at compile time.
-   while it is tempting to have a default of 1 for msb/width field, that is prone to users walking away from a partially edited field.
+ * trying to bind the item address as a template arg runs afoul of the address not being knowable at compile time.
+ * while it is tempting to have a default of 1 for msb/width field, that is prone to users walking away from a partially edited field.
 */
 template <unsigned lsb, unsigned msb, bool msbIsWidth = true> class BitFielder {
     enum {
@@ -328,7 +328,7 @@ template <unsigned pos, unsigned ... poss> struct BitWad<pos, poss ...> {
     }
 
     template<typename Scalar> static Scalar mergeInto(Scalar& target, Scalar packed) {
-      return mergeInto(target, splatter(packed), mask);
+      return ::mergeInto(target, splatter(packed), mask);
     }
 
 };

@@ -10,9 +10,9 @@ struct Boolish {
   //do NOT add a virtual destructor, it causes linker headaches.
   //The cost of not being able to delete one of these without getting to its concrete class is worth this limitation.
   /** @returns argument after setting the value */
-  virtual bool operator =(bool) = 0;
+  virtual bool operator =(bool) = 0; // NOLINT(cppcoreguidelines-c-copy-assignment-signature,misc-unconventional-assign-operator)
   /** @returns a boolean related to the object */
-  virtual operator bool() = 0;
+  virtual operator bool() const = 0; // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
   /** changes state of the boolean */
   virtual void toggle() {
     this->operator=(1 - bool(*this));
@@ -25,8 +25,8 @@ struct BoolishRef {
   //do NOT add a virtual destructor, it causes linker headaches.
   //The cost of not being able to delete one of these without getting to its concrete class is worth this limitation.
   /** @returns argument after setting the value */
-  virtual bool operator =(bool)const = 0;
-  virtual operator bool()const = 0;
+  virtual bool operator =(bool)const = 0; // NOLINT(cppcoreguidelines-c-copy-assignment-signature,misc-unconventional-assign-operator)
+  virtual operator bool()const = 0; // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
   virtual void toggle()const {
     this->operator=(1 - bool(*this));
   }
@@ -47,7 +47,7 @@ class BoolRef: public BoolishRef {
 
 /** for when the read can't afford to regenerate what was last written */
 class CachedBoolish: public Boolish {
-    bool bit;
+    mutable bool bit;
   public:
     //do NOT add a virtual destructor, it causes linker headaches for microcontroller builds.
     //The cost of not being able to delete one of these without getting to its concrete class is worth this limitation.
@@ -62,7 +62,7 @@ class CachedBoolish: public Boolish {
 };
 
 /** creating one of these set the bit (to @param polarity) deleting it (typically automatic at end of scope) clears the bit. */
-template <const BoolishRef &lockbit, bool polarity = 1> struct LockBit {
+template <const BoolishRef &lockbit, bool polarity = true> struct LockBit {
 
   LockBit() {
     lockbit = polarity;
