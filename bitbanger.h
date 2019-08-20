@@ -322,8 +322,8 @@ public:
     return ((packed&1)<<pos)| BitWad<poss ...>::splatter(packed);
   }
 
-  static void template<typename Scalar> Scalar mergeInto(Scalar& target,Scalar packed){
-    retur mergeInto(target, splatter(packed),mask);
+  template<typename Scalar> Scalar mergeInto(Scalar& target,Scalar packed){
+    return mergeInto(target, splatter(packed),mask);
   }
 
 };
