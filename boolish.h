@@ -1,7 +1,11 @@
-#ifndef BOOLISH_H
-#define BOOLISH_H
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "misc-unconventional-assign-operator"
+#pragma ide diagnostic ignored "google-explicit-constructor"
+#pragma ide diagnostic ignored "cppcoreguidelines-c-copy-assignment-signature"
+#pragma once
+//#define BOOLISH_H
 
-/** allow on/off things to be passed around. This varitaion is modifiable. see BoolishRef for things that can be const even though they can be assigned to */
+/** allow on/off things to be passed around. This variation is modifiable. see BoolishRef for things that can be const even though they can be assigned to */
 struct Boolish {
   //do NOT add a virtual destructor, it causes linker headaches.
   //The cost of not being able to delete one of these without getting to its concrete class is worth this limitation.
@@ -15,7 +19,8 @@ struct Boolish {
   }
 };
 
-/** on/off thing which is not changed while it alters some other boolean thing */
+/** on/off thing which is not changed while it alters some other boolean thing.
+ * The NOLINT comments are the reasons this class exists, to make something implicitly appear as a boolean*/
 struct BoolishRef {
   //do NOT add a virtual destructor, it causes linker headaches.
   //The cost of not being able to delete one of these without getting to its concrete class is worth this limitation.
@@ -31,7 +36,7 @@ struct BoolishRef {
 class BoolRef: public BoolishRef {
     bool &ref;
   public:
-    BoolRef(bool &ref): ref(ref) {}
+    BoolRef(bool &ref): ref(ref) {} // NOLINT(hicpp-explicit-conversions)
     bool operator =(bool value)const override {
       return ref = value;
     }
@@ -44,11 +49,15 @@ class BoolRef: public BoolishRef {
 class CachedBoolish: public Boolish {
     mutable bool bit;
   public:
-    //do NOT add a virtual destructor, it casues linker headaches.
+    //do NOT add a virtual destructor, it causes linker headaches for microcontroller builds.
     //The cost of not being able to delete one of these without getting to its concrete class is worth this limitation.
     /** @see Boolish::operator= */
-    virtual bool operator =(bool on);
-    virtual operator bool()const;
+    bool operator =(bool on) override {
+      bit=on;
+    };
+    operator bool()const override {
+      return bit;
+    };
 };
 
 /** creating one of these set the bit (to @param polarity) deleting it (typically automatic at end of scope) clears the bit. */
@@ -63,5 +72,4 @@ template <const BoolishRef &lockbit, bool polarity = 1> struct LockBit {
   }
 };
 
-
-#endif // BOOLISH_H
+#pragma clang diagnostic pop

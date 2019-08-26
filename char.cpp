@@ -47,6 +47,10 @@ bool Char::isControl() const noexcept{
   return iscntrl(raw);
 }
 
+bool Char::isLower() const noexcept {
+	return 'a'<=raw&& raw <='z';
+}
+
 bool Char::isInNumber() const noexcept {
   return isdigit(raw) || in("+-.Ee");
 }

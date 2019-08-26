@@ -217,7 +217,7 @@ extern "C" { //assembly coded in cortexm3.s, usually due to outrageously bad com
 
   /**NB: copyObject() and fillObject() can NOT be used with objects that contain polymorphic objects as they would copy the virtual function tables */
   void copyObject(const void *source, void *target, uint32_t length);
-  void fillObject(void *target, uint32_t length, u8 fill);
+  void fillObject(void *target, uint32_t length, uint8_t  fill);
 
   //EraseThing only works on non-polymorphic types. On polymorphs it also  kills the vtable!
 #define EraseThing(thing) fillObject(thing, sizeof(thing), 0);
@@ -225,7 +225,7 @@ extern "C" { //assembly coded in cortexm3.s, usually due to outrageously bad com
   /** note different order (and type!) of args than std C library memcpy. */
   void memory_copy(const void *source, void *target, void *sourceEnd);
   /** @see memory_copy */
-  void memory_set(void *target, void *targetEnd, u8 value);
+  void memory_set(void *target, void *targetEnd, uint8_t  value);
 
 #if 0 //  fixmelater //!defined( QT_CORE_LIB ) && !defined() //std lib's differ between pc and arm.
   //the difference of two uint16_t's should be a signed int. test your compiler.
