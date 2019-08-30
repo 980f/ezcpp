@@ -7,22 +7,22 @@
 
 #include "cheaptricks.h" //isPresent
 /** In the string below there are pairs of (escape code: escaped char) e.g. n\n
- * it looks confusing as some of the chars being escaped are unchanged by the process.
- * when removing a slash you search for the char and pass back the odd member of the pair
- * when adding slashes you find the char and emit a slash and the even member of the pair
+   it looks confusing as some of the chars being escaped are unchanged by the process.
+   when removing a slash you search for the char and pass back the odd member of the pair
+   when adding slashes you find the char and emit a slash and the even member of the pair
 */
-static const char *SeaScapes="a\a" "b\b" "c\x03" "f\f" "n\n" "r\r" "t\t" "v\v" "\\\\" "//" "''" "??" "\"\"";
+static const char *SeaScapes = "a\a" "b\b" "c\x03" "f\f" "n\n" "r\r" "t\t" "v\v" "\\\\" "//" "''" "??" "\"\"";
 
 
-bool Char::needsSlash()const noexcept{
+bool Char::needsSlash()const noexcept {
   return Index(Cstr(SeaScapes).index(raw)).isOdd();//isOdd includes checking for valid.
 }
 
 /** while named for one usage this works symmetrically */
 char Char::slashee() const noexcept {
-  Index present= Cstr(SeaScapes).index(raw);
-  if(present.isValid()){
-    return SeaScapes[1^present];//xor with 1 swaps even and odd.
+  Index present = Cstr(SeaScapes).index(raw);
+  if (present.isValid()) {
+    return SeaScapes[1 ^ present]; //xor with 1 swaps even and odd.
   } else {
     return raw;
   }
@@ -39,16 +39,39 @@ bool Char::startsName() const noexcept {
   return isalpha(raw);
 }
 
-bool Char::isDigit() const noexcept{
+bool Char::isDigit() const noexcept {
   return isdigit(raw);
 }
 
-bool Char::isControl() const noexcept{
+bool Char::isControl() const noexcept {
   return iscntrl(raw);
 }
 
+bool Char::isUpper() const noexcept {
+  return 'A' <= raw && raw <= 'Z';
+}
+
 bool Char::isLower() const noexcept {
-	return 'a'<=raw&& raw <='z';
+  return 'a' <= raw && raw <= 'z';
+}
+/** convert to lower case and @return whether that caused a change */
+bool Char::toLower() noexcept {
+  if (isUpper()) {
+    raw -= 'A' - 'a';
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/** convert to lower case and @return whether that caused a change */
+bool Char::toUpper() noexcept {
+  if (isLower()) {
+    raw -= 'a' - 'A';
+    return true;
+  } else {
+    return false;
+  }
 }
 
 bool Char::isInNumber() const noexcept {
@@ -69,14 +92,14 @@ bool Char::isHexDigit() const noexcept {
 
 //#include "ignoresignwarnings.h"
 unsigned Char::hexDigit() const noexcept {
-  unsigned trusting=(raw|0x20) - '0';//tolowerthen subtract char for zero.
-  if((trusting>9)){
-    trusting-=39;
+  unsigned trusting = (raw | 0x20) - '0'; //tolowerthen subtract char for zero.
+  if ((trusting > 9)) {
+    trusting -= 39;
   }
   return trusting; //'A'-'0' = 17, want 10 for that
 }
 
 char Char::hexNibble(unsigned sb) const noexcept {
-  unsigned char nib= 15&(raw>>(sb*4)); //push to low nib
-  return nib>9? 'A'+nib-10: '0'+nib;
+  unsigned char nib = 15 & (raw >> (sb * 4)); //push to low nib
+  return nib > 9 ? 'A' + nib - 10 : '0' + nib;
 }

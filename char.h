@@ -35,9 +35,15 @@ class Char {
 
     /** @returns whether this is first char of an identifier, per JSON and C++ rules. This is pretty much anything that isn't a number, punctuation or a control char */
     bool startsName() const noexcept;
-
+    /** @returns whether this is exactly an upper case letter */
+    bool isUpper() const noexcept ;
     /** @returns whether this is exactly a lower case letter */
     bool isLower() const noexcept;
+
+    /** convert to lower case and @return whether that caused a change */
+    bool toLower() noexcept;
+  /** convert to lower case and @return whether that caused a change */
+    bool toUpper() noexcept;
 
     /** @returns whether this is a decimal digit */
     bool isDigit() const noexcept;
