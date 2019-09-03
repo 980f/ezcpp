@@ -33,12 +33,6 @@ template <typename Scalar, typename Scalar2> int assigncmp(Scalar&target, Scalar
 /** @see template of same name. This instantiation does an 'nearly equal' compare */
 bool changed(double&target, double &&newvalue);
 
-/** @return value, zeroes the source */
-template <typename Scalar> Scalar take(Scalar&varb) {
-  Scalar was = varb;
-  varb = Scalar(0);
-  return was;
-}
 
 /** form of AssignOnExit for use in a return statement: */
 template <typename Scalar> Scalar postAssign(Scalar&varb, Scalar value) {
@@ -49,10 +43,40 @@ template <typename Scalar> Scalar postAssign(Scalar&varb, Scalar value) {
 
 /** form of AssignOnExit for use in a return statement: */
 template <typename Scalar,typename Similar> Scalar postAssign(Scalar&varb, Similar value) {
-  Scalar was = varb;
-  varb = Scalar(value);
-  return was;
+  return postAssign(varb,Scalar(value));
 }
+
+/** @return value, zeroes the source */
+template <typename Scalar> Scalar take(Scalar&varb) {
+  return postAssign(varb,0);
+}
+
+/** Clear On Reference. Like core memory :) */
+template <typename Scalar> class COR {
+	Scalar memory;
+	public:
+	COR(Scalar init):memory(init){
+		//#done
+	}
+
+	operator Scalar(){
+		return take(memory);
+	}
+
+	Scalar operator =(Scalar value){//non-standard op=
+		memory=value;
+		return value;
+	}
+
+	//add non taking operators at need.
+
+	operator bool()const {
+		return memory!=0;
+	}
+
+	
+};
+
 
 
 /** for test and clear, may eventually wrap atomic operation */

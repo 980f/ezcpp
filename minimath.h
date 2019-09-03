@@ -39,6 +39,17 @@ template <typename mathy> int signof(mathy x) {
   return 0;
 }
 
+/** @returns sign of x-y */
+template <typename mathy> int signof(mathy x,mathy y) {
+  if (x < y) {
+    return -1;
+  }
+  if (x > y) {
+    return +1;
+  }
+  return 0;
+}
+
 
 /** 'round to nearest' ratio of integers*/
 inline uint32_t rate(uint32_t num, uint32_t denom) {

@@ -54,10 +54,11 @@ bool Char::isUpper() const noexcept {
 bool Char::isLower() const noexcept {
   return 'a' <= raw && raw <= 'z';
 }
+
 /** convert to lower case and @return whether that caused a change */
 bool Char::toLower() noexcept {
   if (isUpper()) {
-    raw -= 'A' - 'a';
+    raw |= 0x20;
     return true;
   } else {
     return false;
@@ -67,7 +68,7 @@ bool Char::toLower() noexcept {
 /** convert to lower case and @return whether that caused a change */
 bool Char::toUpper() noexcept {
   if (isLower()) {
-    raw -= 'a' - 'A';
+    raw &= ~0x20;
     return true;
   } else {
     return false;

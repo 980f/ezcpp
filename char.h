@@ -45,6 +45,17 @@ class Char {
   /** convert to lower case and @return whether that caused a change */
     bool toUpper() noexcept;
 
+		/** @returns char conditionally toUpper'd or toLower'd or unmodified */
+		bool toCase(int which) const{
+			if(which>0 && isLower()){
+				return raw &~ 0x20;
+			} 
+			if(which<0 && isUpper()){
+				return raw | 0x20;
+			}
+			return raw;
+		}
+		
     /** @returns whether this is a decimal digit */
     bool isDigit() const noexcept;
 

@@ -12,7 +12,7 @@ struct Boolish {
   /** @returns argument after setting the value */
   virtual bool operator =(bool) = 0;
   /** @returns a boolean related to the object */
-  virtual operator bool()const = 0;
+  virtual operator bool() = 0;
   /** changes state of the boolean */
   virtual void toggle() {
     this->operator=(1 - bool(*this));
@@ -47,7 +47,7 @@ class BoolRef: public BoolishRef {
 
 /** for when the read can't afford to regenerate what was last written */
 class CachedBoolish: public Boolish {
-    mutable bool bit;
+    bool bit;
   public:
     //do NOT add a virtual destructor, it causes linker headaches for microcontroller builds.
     //The cost of not being able to delete one of these without getting to its concrete class is worth this limitation.
@@ -55,7 +55,7 @@ class CachedBoolish: public Boolish {
     bool operator =(bool on) override {
       bit=on;
     };
-    operator bool()const override {
+    operator bool() override {
       return bit;
     };
 };
