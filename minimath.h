@@ -12,7 +12,7 @@ const extern double Nan;
 /** 'signbit' is a macro in math.h that pertains only to floating point arguments
     @return sign of operand, and convert operand to its magnitude, MININT(0x800...) is still MININT and must be interpreted as unsigned to work correctly
 */
-inline int signabs(int&absolutatus) {
+template <typename SignedInt> int signabs(SignedInt& absolutatus) {
   if (absolutatus < 0) {
     absolutatus = -absolutatus;
     return -1;
