@@ -332,3 +332,5 @@ template <unsigned pos, unsigned ... poss> struct BitWad<pos, poss ...> {
     }
 
 };
+
+#define bits(...)  (BitWad<__VA_ARGS__>::mask)
