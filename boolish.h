@@ -54,6 +54,7 @@ class CachedBoolish: public Boolish {
     /** @see Boolish::operator= */
     bool operator =(bool on) override {
       bit=on;
+      return on;
     };
     operator bool() override {
       return bit;
