@@ -56,7 +56,8 @@ class CachedBoolish: public Boolish {
       bit=on;
       return on;
     };
-    operator bool() override {
+
+    operator bool() const override {
       return bit;
     };
 };
