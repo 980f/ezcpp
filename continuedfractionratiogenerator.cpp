@@ -1,6 +1,12 @@
 //(C) 2017 by Andrew L. Heilveil
 #include "continuedfractionratiogenerator.h"
-#include "minimath.h"
+//#include "minimath.h" only needed splitteru so I copied that here for publication ease
+unsigned splitteru(double &d){
+  double eye; //"modf()" has an inconvenient argument order and return type.
+  d = modf(d,&eye);  //todo:2 this can be done very efficiently via bit twiddling. 
+  return unsigned(eye);
+}
+
 
 ContinuedFractionRatioGenerator::ContinuedFractionRatioGenerator(){
   restart(0);
