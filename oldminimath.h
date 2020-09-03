@@ -7,10 +7,27 @@
 //portable nan etc. symbols, our compilers don't seem to agree on these guys, or the syntax is horrible.
 const extern double Infinity;
 const extern double Nan;
+/** specifically nan, not infinity, @see isSignal() */
+bool isNan(double d);
+/** isNan(int) exists to allow templates to use isNan for floats without fancy type testing*/
+inline bool isNan(int){
+  return false;
+}
 
+inline bool isNan(unsigned){
+  return false;
+}
 
-/** 'signbit' is a macro in math.h that pertains only to floating point arguments
-    @return sign of operand, and convert operand to its magnitude, MININT(0x800...) is still MININT and must be interpreted as unsigned to work correctly
+/** is a normalized fp number, excludes zero and signals */
+bool isNormal(double d);
+/** is not a value */
+bool isSignal(double d);
+
+/** is either 0 or not a nan. */
+bool isDecent(double d);
+
+/** Note: 'signbit' is a macro in math.h that pertains only to floating point arguments
+ * @returns sign of operand, and converts operand to its magnitude, MININT(0x800...) is still MININT and must be interpreted as unsigned to work correctly
 */
 template <typename SignedInt> int signabs(SignedInt& absolutatus) {
   if (absolutatus < 0) {
@@ -20,20 +37,28 @@ template <typename SignedInt> int signabs(SignedInt& absolutatus) {
   return absolutatus ? 1 : 0;
 }
 
-//replaced with signof<>. Name was too popular with other math packages.
-//inline int signum(int anint) {
-//  if (anint < 0) {
-//    return -1;
-//  }
-//  return anint ? 1 : 0;
-//}
+/** Note: 'signbit' is a macro in math.h that pertains only to floating point arguments
+ * @returns sign of operand, and converts operand to its magnitude, MININT(0x800...) is still MININT and must be interpreted as unsigned to work correctly
+ */
+template<typename Numerical> Numerical absvalue(Numerical absolutatus, int *sign = nullptr){
+  if(absolutatus < 0) {
+    if(sign) {
+      *sign = -1;
+    }
+    return -absolutatus;
+  }
+  if(sign) {
+    *sign = absolutatus ? 1 : 0;
+  }
+  return absolutatus;
+} // absvalue
 
 //yet another filter to reconcile platform math.h issues. Make specializations per platform for performance.
 template <typename mathy> int signof(mathy x) {
   if (x < 0) {
     return -1;
   }
-  if (x > 0) {
+  if(x != 0) {//using != instead of > makes NaN's positive instead of 0
     return +1;
   }
   return 0;
@@ -50,6 +75,17 @@ template <typename mathy> int signof(mathy x,mathy y) {
   return 0;
 }
 
+/** @returns positivity as a multiplier */
+inline int polarity(bool positive){
+  return positive ? 1 : -1;
+}
+
+/** @return negative if lhs is < rhs, 0 if lhs==rhs, +1 if lhs>rhs .
+ *  to sort ascending if returns + then move lhs to higher than rhs.
+ */
+template< typename mathy > int compareof(mathy lhs,mathy rhs){
+  return signof(lhs - rhs);
+}
 
 /** 'round to nearest' ratio of integers*/
 inline uint32_t rate(uint32_t num, uint32_t denom) {
@@ -59,13 +95,20 @@ inline uint32_t rate(uint32_t num, uint32_t denom) {
   return (num + (denom / 2)) / denom;
 }
 
+inline unsigned half(unsigned sum){
+  return (sum + 1) / 2;
+}
+
 //#rate() function takes unsigned which blows hard when have negative numbers
 inline int half(int sum) {
+  if(sum<0) {//truncate towards larger magnitude
+    return -half(-sum);//probably gratuitous but we also shouldn't be calling this with negatives so we can breakpoint here to detect that.
+  }
   return (sum + 1) / 2;
 }
 
 /** quantity of bins needed to hold num items at denom items per bin*/
-inline uint32_t quanta(uint32_t num, uint32_t denom) {
+template<typename Integer,typename Inttoo> Integer quanta(Integer num, Inttoo denom){
   if (denom == 0) {
     return num == 0 ? 1 : 0; //pathological case
   }
@@ -103,9 +146,9 @@ inline double rounder(double value, double quantum) {
   return quantum * chunks(value, quantum);
 }
 
-/** canonical value % cycle, minimum positive value
-  0<= return <cycle;
-  % operator gives negative out for negative in.
+/** @returns canonical value % cycle, minimum positive value
+ *  0<= return <cycle;
+ *  Note: the C '%' operator gives negative out for negative in.
 */
 int modulus(int value, unsigned cycle);
 
@@ -160,6 +203,36 @@ uint32_t Pnr(unsigned n, unsigned  r);
 uint32_t Cnr(unsigned n, unsigned  r);
 
 
+/** if a is greater than b set it to b and @return whether a change was made.
+ *  if orequal is true then also return true if args are equal.
+ *  if a is Nan then do the assign and return true */
+template< typename S1, typename S2 > bool depress(S1 &a, S2 b,bool orequal = false){
+  if(isNan(b)) {
+    return false;
+  }
+  S1 b1 = S1(b); //so incomparable types gives us just one error.
+  if(isNan(a) || a > b1) {
+    a = b1;
+    return true;
+  }
+  return orequal && a==b1;
+} // depress
+
+/** if a is less than b set it to b and @return whether a change was made.
+ *  if orequal is true then also return true if args are equal.
+ *  if a is Nan then do the assign and return true */
+template< typename S1, typename S2 > bool elevate(S1 &a, S2 b,bool orequal = false){
+  if(isNan(b)) {
+    return false;
+  }
+  S1 b1 = S1(b); //so incomparable types gives us just one error.
+  if(isNan(a) || a < b1) {
+    a = b1;
+    return true;
+  }
+  return orequal && a==b1;
+} // elevate
+
 
 ////#define something as needed to kill any other min/max's as needed.
 //template adandoned as the firmware rev of gcc couldn't deal with uint32_t vs unsigned int, i.e. it type checked  before applying typedef's
@@ -171,7 +244,9 @@ uint32_t Cnr(unsigned n, unsigned  r);
 //  }
 //}
 
-//todo: see if compiler can use this for min of convertible types:
+//using 'lesser' and 'greater' while we check if all of our compilers now have compatible min and max std functions.
+
+//todo:2 see if compiler can use this for min of convertible types:
 template <typename S1, typename S2> S1 lesser(S1 a, S2 b) {
   S1 b1 = static_cast<S1>(b); //so incomparable types gives us just one error.
   if (a < b1) {
@@ -180,6 +255,16 @@ template <typename S1, typename S2> S1 lesser(S1 a, S2 b) {
     return b1;
   }
 }
+
+template< typename S1, typename S2 > S1 greater(S1 a, S2 b){
+  S1 bb = S1(b);
+  if(a > bb) {
+    return a;
+  } else {
+    return bb;
+  }
+}
+
 
 #undef max
 template <typename Scalar, typename S2> Scalar max(Scalar a, S2 b) {

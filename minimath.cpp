@@ -16,17 +16,18 @@ const double Nan=NAN;//punter{.i64=0x7FF8LL<<48}.d;
 //const pfunter fNan=     {.i32 =0x1FFU<<22};
 #endif
 
+
 extern "C" {
 //stubs.cpp keeps on getting lost, inline those here weakly:
 
 /** @returns @param arg*num/denom rounded and overflow managed (internal 64 bit temps)  */
-u32 muldivide(u32 arg, u32 num, u32 denom) WEAK;
-u32 muldivide(u32 arg, u32 num, u32 denom){
+unsigned muldivide(u32 arg, u32 num, u32 denom) WEAK;
+unsigned muldivide(u32 arg, u32 num, u32 denom){
   return rate(arg*num,denom);
 }
 
-int log2Exponent(u32 number) WEAK;
-int log2Exponent(u32 number){
+unsigned log2Exponent(u32 number) WEAK;
+unsigned log2Exponent(u32 number){
   int exponent=-1;
   while(number){
     ++exponent;
