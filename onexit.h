@@ -40,9 +40,9 @@ public:
 
 
 #if __has_include(<functional>)
-#include <functional>
+//#include <functional>
 struct OnExit {
-  typedef std::function<void(void)> Lamda;
+  using Lamda= void(*)(void);
   Lamda lamda;
   OnExit(Lamda dolater):lamda(dolater){
     //#nada

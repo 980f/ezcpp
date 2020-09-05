@@ -94,3 +94,21 @@ double StopWatch::roll(double *absolutely){
   }
   return asSeconds(delta);
 }
+
+unsigned StopWatch::cycles(double atHz,bool andRoll){
+  double seconds=elapsed();
+  //could provide for more precise cycling by adjusting start by fraction of events *1/atHz.
+  double events=seconds*atHz;
+  auto cycles=unsigned(events);//#we want truncation, rounding would be bad.
+  if(andRoll){
+    if(cycles>0){//only roll if the caller is going to take action.
+      if(running) {
+        started = stopped;//#do NOT start(), want to read the clock just once with each roll.
+        // a refined version would subtract out the fractional part of events/atHz, for less jitter.
+        //if we did that we could drop the test for cycles>0, however doing that test is efficient.
+      }
+    }
+  }
+  return cycles;
+}
+

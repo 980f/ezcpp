@@ -1,5 +1,5 @@
 #include "cstr.h"
-#include "string.h"
+#include "string.h" //strlen strcmp ...
 
 
 Cstr::Cstr() : ptr(nullptr){
@@ -73,6 +73,26 @@ int Cstr::cmp(TextKey rhs) const noexcept {
     return Cstr(rhs).nonTrivial() ? -1 : 0;
   }
 } // Zstring::cmp
+
+ unsigned Cstr::asUnsigned(const char **tail) const noexcept {
+  if(nonTrivial()) {
+    unsigned acc=0;
+    for(const char*s=ptr;*s;++s){
+      unsigned digit=*s-'0';
+      if(digit>9){
+        if(tail){
+          *tail=s;
+        }
+        return acc;
+      } else {
+        acc*=10;
+        acc+=digit;
+      }    
+    }
+  } else {
+    return 0;
+  }
+}
 
 bool Cstr::startsWith(TextKey other) const noexcept {
   if(ptr == nullptr) {

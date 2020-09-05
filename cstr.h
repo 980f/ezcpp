@@ -83,6 +83,9 @@ public:
   /** @returns pointer to first character in this string which matches ch. @see chr() */
   const char *rchr(int chr) const noexcept;
 
+/** @returns the leading numerical part of the string. If you provide a tail it will be pointed at the char that stopped the parsing */
+  unsigned asUnsigned(const char **tail=nullptr) const noexcept;
+
   /** forget the target */
   virtual void clear() noexcept;
 
