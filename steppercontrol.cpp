@@ -1,4 +1,5 @@
 #include "steppercontrol.h"
+#include "minimath.h"
 
 StepperControl::StepperControl(void){
   a.position = 0;
@@ -17,11 +18,11 @@ double GasPedal::acceleration(void){
 
 /////////////////
 void StepperControl::retrigger(bool h2){
-  also(true);
-  v.also(true);//doesn't trigger activity so doesn't cost much
-  if(h2){
-    h.also(true);
-  }
+//  also(true);
+//  v.also(true);//doesn't trigger activity so doesn't cost much
+//  if(h2){
+//    h.also(true);
+//  }
 }
 
 void StepperControl::setTarget(int step){
