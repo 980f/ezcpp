@@ -6,12 +6,10 @@ class Char {
     char raw;
 
   public:
-    Char(char raw = 0) {
-      this->raw = raw;
-    }
+    Char(char raw = 0):raw(raw) { }
 
-    Char&operator =(char raw) {
-      this->raw = raw;
+    Char&operator =(char newraw) {
+      raw = newraw;
       return *this;
     }
 
