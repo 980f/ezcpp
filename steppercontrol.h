@@ -2,7 +2,7 @@
 #define STEPPERCONTROL_H
 
 
-#include "cheapTricks.h"
+#include "cheaptricks.h"
 struct GasPedal {
   double start;
   double cruise;
