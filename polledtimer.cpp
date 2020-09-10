@@ -60,6 +60,8 @@ void PolledTimer::freeze(){
   running = 0;//precludes isr touching remaining time, and onDone doesn't get called.
 }
 
+PolledTimer::~PolledTimer(){}
+
 ////////////////////////////
 
 bool CyclicTimer::hasFired(){

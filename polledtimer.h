@@ -19,7 +19,7 @@ protected:
   Ticks systicksRemaining;
 public:
   PolledTimer();
-
+  ~PolledTimer();//=default;
   virtual void restart(Ticks ticks);
 
   void restart(float seconds);//float (not double) as is often in time critical code.

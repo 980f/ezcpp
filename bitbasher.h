@@ -1,4 +1,7 @@
-#pragma once //(C) 2017,2018 Andy Heilveil , github/980F
+#ifndef BITBANGER_H
+#define BITBANGER_H "need to exclude other bitbanger headers that might be laying about"
+//(C) 2017,2018 Andy Heilveil , github/980F
+
 
 
 /** bit and bitfield setting and getting.*/
@@ -329,3 +332,5 @@ public:
 };
 
 #define bits(...)  (BitWad<__VA_ARGS__>::mask)
+
+#endif
