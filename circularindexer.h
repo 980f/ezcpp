@@ -4,8 +4,8 @@
 /**a useful subset of a fifo, such as for memory for a moving average */
 template <typename Content> class CircularIndexer {
 protected:
-  unsigned int pointer;
-  unsigned int length; //could use size_t, but that would be painful and we won't ever get close to 2**32 with this codebase.
+  unsigned pointer;
+  unsigned length; //could use size_t, but that would be painful and we won't ever get close to 2**32 with this codebase.
   Content *buffer; // '*' rather than '&' so that we can retarget via clone or snap.
 public:
   //#below: truncating divide, omit attempt to have partial last element.
