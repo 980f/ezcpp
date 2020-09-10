@@ -13,15 +13,16 @@ IntegerTwiddler::IntegerTwiddler(unsigned numer, unsigned denom, bool center) {
   setRatio(numer, denom, center);
 }
 
+
 void IntegerTwiddler::setRatio(unsigned numer, unsigned denom, bool center) {
   above = numer;
   below = denom;
   if (center) {
     twiddle = (above - below) / 2;
   } else {
-    if (twiddle > below) {
+    if (twiddle > below) {  //#-Wsign-compare OK
       twiddle = below;
-    } else if (twiddle < -above) {
+    } else if (twiddle < -above) { //#-Wsign-compare OK
       twiddle = -above;
     }
   }
