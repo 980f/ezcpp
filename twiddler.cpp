@@ -13,7 +13,9 @@ IntegerTwiddler::IntegerTwiddler(unsigned numer, unsigned denom, bool center) {
   setRatio(numer, denom, center);
 }
 
-
+//neither following pragma worked :(
+//#pragma clang diagnostic ignored "-Wsign-compare"
+//#pragma gcc diagnostic ignored "-Wsign-compare"
 void IntegerTwiddler::setRatio(unsigned numer, unsigned denom, bool center) {
   above = numer;
   below = denom;
