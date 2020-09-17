@@ -13,7 +13,7 @@ IntegerTwiddler::IntegerTwiddler(unsigned numer, unsigned denom, bool center) {
   setRatio(numer, denom, center);
 }
 
-//neither following pragma worked :(
+//neither following pragma worked :(  suppressed via CLI arg for the whole file.
 //#pragma clang diagnostic ignored "-Wsign-compare"
 //#pragma gcc diagnostic ignored "-Wsign-compare"
 void IntegerTwiddler::setRatio(unsigned numer, unsigned denom, bool center) {
