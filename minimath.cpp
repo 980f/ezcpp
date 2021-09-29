@@ -5,7 +5,10 @@
 const double Infinity = std::numeric_limits<double>::infinity();
 const double Nan = std::numeric_limits<double>::quiet_NaN();
 #else
+
+#ifndef ARDUINO
 #include <cmath>
+#endif
 //firmware platform didn't have a useful limits.h so ...
 //union punter{  long long i64; double d;};
 const double Infinity=INFINITY;//punter{.i64= 0x7FFLL<<52}.d;
