@@ -1,1 +1,8 @@
 c++ code for convenient things, such as "countof(array)" macro and other frequently used expressions.
+
+master branch is for new work with latest processors, and compatibility with 'safely' repo.
+
+v1 branch predates compatibility with safely and is not suggested for new projects.
+
+avrduino branched from v1 as the avr gcc is way behind other versions, 4.9.2 when the branch was created.
+
