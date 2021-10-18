@@ -328,4 +328,5 @@ public:
   }
 };
 
-#define bits(...)  (BitWad<__VA_ARGS__>::mask)
+//prior name of just bits() was too generic, e.g. modified name of function in analog.h
+#define mkBits(...)  (BitWad<__VA_ARGS__>::mask)
