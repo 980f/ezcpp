@@ -1,7 +1,7 @@
 #include "twiddler.h"
 #include "minimath.h"
 
-#ifdef UseContinuedFractions
+#ifdef UseContinuedFractions  //continued fractions representation of a number have a computational side effect of producing the values useful for this module.
 #include "continuedfractionratiogenerator.h"
 #endif
 
@@ -17,7 +17,7 @@ void IntegerTwiddler::setRatio(unsigned numer, unsigned denom, bool center) {
   above = numer;
   below = denom;
   if (center) {
-    twiddle = (above - below) / 2;
+    twiddle = (above - below +1) / 2;//average is least biased starting value
   } else {
     if (twiddle > below) {
       twiddle = below;
