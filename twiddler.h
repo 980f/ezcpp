@@ -1,6 +1,9 @@
 #ifndef TWIDDLER_H
 #define TWIDDLER_H
-#include "eztypes.h"
+//#include "eztypes.h" //lazy class that mostly just replaced '_' based names
+#include <inttypes.h> //found in some library
+using u32 = uint32_t;
+
 /** software PWM
   * implements as a ratio of two integers without using division except during some of the optional setup functions.
   */

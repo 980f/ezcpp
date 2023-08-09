@@ -1,5 +1,5 @@
 #include "twiddler.h"
-#include "minimath.h"
+#include "minimath.h"  //ratio and quanta
 
 IntegerTwiddler::IntegerTwiddler(){
   freeze();
