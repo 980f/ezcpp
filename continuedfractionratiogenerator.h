@@ -24,11 +24,20 @@ public:
    */
   unsigned limit;
 public:
+	/** run the algorithm for the best match to @param ratio where no number is greater than @param limit.
+		if the limit is zero then the maximum for the unsigned type on the platform is used.
+	@returns &this */
+	public ContinuedFractionRatioGenerator& run(double ratio,unsigned limit = 0){
+		restart(ratio,limit);
+  	best();
+  	return *this;
+  }
+    
   /** create one for learning the algorithm*/
   ContinuedFractionRatioGenerator();
 
-  /** @returns the best integer ratio for @param ratio */
-  ContinuedFractionRatioGenerator Run(double ratio,unsigned limit = 0){
+  /** @returns the best integer ratio for @param ratio. Relies upon copy constructor which is not cheap. */
+  static ContinuedFractionRatioGenerator Run(double ratio,unsigned limit = 0){
     ContinuedFractionRatioGenerator generator;
     generator.restart(ratio,limit);
     generator.best();
