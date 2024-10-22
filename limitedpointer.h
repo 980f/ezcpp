@@ -2,35 +2,41 @@
 #define LIMITEDPOINTER_H
 #include <stdint.h>
 
-/** a pointer into an externally allocated array of some type. Given that range this keeps itself within that range (if you let it) */
+/** a pointer into an externally allocated array of some type. Given that range this keeps itself within that range (if you let it).
+  The class is slightly inconsistent in that if you run off the end you get the beginning from then on (if there is one), 
+  although under many conditions you will get slapped with a SEGV/NPE if you have ignored the validity checking access methods.
+  
+  This allows an embedded program to keep on running with a defect that you will hopefully notice rather than going tits up in code that might not matter much.
+*/
 
 template <typename Scalar> class LimitedPointer {
+    Scalar * const base;
+    Scalar * const end; // actually one past the end
     Scalar *pointer;
-    Scalar *base;
-    Scalar *end; // actually one past the end
-
+    
   public:
-    LimitedPointer(Scalar *base, unsigned quantity):
-      base(base) {
-      pointer = base;
-      if (base == nullptr) {
-        end = nullptr;
-      } else {
-        end = &(base[quantity]);
-      }
+  /** using a signed quantity so that an all-ones marker value for 'none' works the same as 0 */
+    LimitedPointer(Scalar *theBase, size_t quantity = 0):
+      base( (quantity > 0) ? theBase : nullptr),
+      end( (quantity > 0) ? &(base[quantity]) : nullptr { 
+      pointer = base; 
     }
 
-    LimitedPointer(): LimitedPointer(nullptr, 0) {
-
+    LimitedPointer(): LimitedPointer(nullptr) {
+      //this is an invalid, not wellDefined instance. 
     }
 
-    /** @returns whether next() will return an expected value, i.e. whether it makes sense to call next(). This is a weaker operation than the operator bool() version, for urgent loops where wellDefined() can be checked once. */
+    /** @returns whether next() will return an expected value, i.e. whether it makes sense to call next(). 
+      This is a weaker operation than the operator bool() version, for urgent loops where wellDefined() can be checked once. */
     inline bool isValid()const {
       return pointer < end;
     }
 
+    /** @returns whether there is at least one element in the buffer.
+      At one time returned true even if the buffer was empty (zero content allocated, but address was valid)
+     */
     inline bool wellDefined() const {
-      return base != nullptr && end >= base;
+      return base != nullptr && end > base;
     }
 
     /** @returns whether @see wellDefined() and @see isValid() */
@@ -38,7 +44,7 @@ template <typename Scalar> class LimitedPointer {
       return wellDefined() && isValid();
     }
 
-    /** use like pointer */
+    /** use like pointer. If the object is not also wellDefined then use of this guy might get you an NPE */
     inline Scalar &operator *() const {
       return isValid() ? *pointer : *base;
     }
@@ -48,9 +54,10 @@ template <typename Scalar> class LimitedPointer {
       if (isValid()) {
         return pointer;
       } else {
-        return base; // on defective access point to the entity most likely to be noticed if trashed.
+        return base;
       }
     }
+    
     /** @returns object offset by @param index relative to this pointer, but base object if index is out of range. */
     Scalar &operator [](int index) const {
       Scalar *proposed = pointer += index;
@@ -59,12 +66,12 @@ template <typename Scalar> class LimitedPointer {
       } else if (proposed < base) {
         return *base;
       } else {
-        return* proposed;
+        return *proposed;
       }
     }
 
     Scalar &next() {
-      if (*this) {
+      if (this->operator bool) { 
         return *pointer++;
       } else {
         return *base; // on defective access point to the entity most likely to be noticed if trashed.
@@ -76,7 +83,7 @@ template <typename Scalar> class LimitedPointer {
       Scalar *proposed = pointer + amount;
 
       if (proposed >= end) {
-        pointer = end;
+        pointer = end; //value here and below are chosen for easy debug of most common fault cases.
       } else if (proposed < base) {
         pointer = base;
       } else {
