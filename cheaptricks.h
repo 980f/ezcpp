@@ -53,32 +53,37 @@ template <typename Scalar> Scalar take(Scalar&varb) {
 
 /** Clear On Reference. Like core memory :) */
 template <typename Scalar> class COR {
-	Scalar memory;
-	public:
-	COR(Scalar init):memory(init){
-		//#done
-	}
+  Scalar memory;
+  public:
+  COR(Scalar init):memory(init){
+    //#done
+  }
 
-	operator Scalar(){
-		return take(memory);
-	}
+  operator Scalar(){
+    return take(memory);
+  }
 
-	Scalar operator =(Scalar value){//non-standard op=
-		memory=value;
-		return value;
-	}
+  Scalar operator =(Scalar value){
+    memory = value;
+    return value;
+  }
 
-	//add non taking operators at need.
-
-	operator bool()const {
-		return memory!=0;
-	}
-
+  ///////////////////////////////////////
+  // add non taking operators at need.
+  
+  /** @returns whether value is not zero, without taking it */
+  operator bool()const {
+    return memory!=0;
+  }
+  
+  /** added for clirp class */
+  bool operator==(Scalar other)const {
+    return memory == other;
+  }
 	
-};
+}; //end of COR.
 
-
-
+///////////////////////////////////////////////////////
 /** for test and clear, may eventually wrap atomic operation */
 template <typename Scalar> Scalar flagged(Scalar&varb) ISRISH;
 template <typename Scalar> Scalar flagged(Scalar&varb) {

@@ -44,7 +44,7 @@ bool ContinuedFractionRatioGenerator::step(){
   return false;
 } // ContinuedFractionRatioGenerator::step
 
-double ContinuedFractionRatioGenerator::approximation(){
+double ContinuedFractionRatioGenerator::approximation() const{
   return ratio(double(numerator()),double(denominator()));
 }
 
