@@ -177,15 +177,15 @@ template<unsigned lsb, unsigned msb, bool msbIsWidth = true> class BitFielder {
     mask = msbIsWidth ? bitMask(lsb, msb) : fieldMask(msb, lsb) // aligned mask
   };
 public:
-  static unsigned extract(unsigned &item) const {
+  static unsigned extract(unsigned &item)  {
     return (item & mask) >> lsb;
   }
 
-  static unsigned operator ()(unsigned &&item)const{
+  unsigned operator ()(unsigned &&item) const {
     return extract(item);
   }
 
-  static unsigned mergeInto(volatile unsigned &item,unsigned value) const {
+  static unsigned mergeInto(volatile unsigned &item,unsigned value)  {
     unsigned merged = (item & ~mask) | ((value << lsb) & mask);
     item = merged;
     return merged;

@@ -19,7 +19,7 @@ bool isNormal(double d);
 /** is not a value */
 bool isSignal(double d);
 
-__unused /** is either 0 or not a nan. */
+/** is either 0 or not a nan. */
 bool isDecent(double d);
 
 /** Note: 'signbit' is a macro in math.h that pertains only to floating point arguments
