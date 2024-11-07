@@ -5,11 +5,11 @@
 #define URGENTLY __attribute__((always_inline))
 /** @returns byte address argument as a pointer to that byte */
 //URGENTLY //irritating to step through during debug.
-constexpr unsigned* atAddress(unsigned address){
+constexpr volatile unsigned * atAddress(const unsigned address){
   return reinterpret_cast<unsigned *>(address);
 }
 
-constexpr bool bit(unsigned patter, unsigned bitnumber){
+constexpr bool bit(const unsigned patter, const unsigned bitnumber){
   return (patter & (1 << bitnumber)) != 0;
 }
 
@@ -70,7 +70,7 @@ inline bool assignBit(unsigned &pattern, unsigned bitnumber,bool one){
 }
 
 struct BitReference {
-  unsigned &word;
+  volatile unsigned &word;
   unsigned mask;
   /** initialize from a memory address and bit therein. If address isn't aligned then bitnumber must be constrained to stay within the same word*/
   BitReference(unsigned memoryAddress,unsigned bitnumber):
@@ -94,17 +94,17 @@ struct BitReference {
 
 
 /** @returns splice of two values according to @param mask */
-constexpr unsigned int insertField(unsigned &target, unsigned source, unsigned mask){
+constexpr unsigned int insertField(volatile unsigned &target, unsigned source, unsigned mask){
   return (target & ~mask) | (source & mask);
 }
 
 /** splices a value into another according to @param mask */
-inline unsigned mergeInto(unsigned &target, unsigned source, unsigned mask){
+inline unsigned mergeInto(volatile unsigned &target, unsigned source, unsigned mask){
   return target= insertField(target,source, mask);
 }
 
 /** splices a value into another according to @param mask */
-inline unsigned mergeInto(unsigned *target, unsigned source, unsigned mask){
+inline unsigned mergeInto(volatile unsigned *target, unsigned source, unsigned mask){
   return *target= insertField(*target,source, mask);
 }
 
@@ -140,11 +140,11 @@ constexpr unsigned int insertBits(unsigned target, unsigned source, unsigned lsb
   return insertField(target, source<<lsb ,bitMask(lsb,width));
 }
 
-inline unsigned mergeBits(unsigned &target, unsigned source, unsigned lsb, unsigned width){
-  return mergeInto(target,source<<lsb,bitMask(lsb,width));
+inline unsigned mergeBits(volatile unsigned &target, unsigned source, unsigned lsb, unsigned width){
+  return mergeInto(&target,source<<lsb,bitMask(lsb,width));
 }
 
-inline unsigned mergeBits(unsigned *target, unsigned source, unsigned lsb, unsigned width){
+inline unsigned mergeBits(volatile unsigned *target, unsigned source, unsigned lsb, unsigned width){
   return mergeInto(target,source<<lsb,bitMask(lsb,width));
 }
 
@@ -172,7 +172,7 @@ public:
     return extract(item);
   }
 
-  unsigned mergeInto(unsigned &item,unsigned value) const {
+  unsigned mergeInto(volatile unsigned &item,unsigned value) const {
     unsigned merged= (item & ~mask) | ((value << lsb) & mask);
     item=merged;
     return merged;
