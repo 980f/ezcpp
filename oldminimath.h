@@ -1,5 +1,9 @@
 #pragma once
 
+//Arduino sloppiness made me remove this: 
+#include "eztypes.h"
+//#include <stdint.h>  //<cstdint> not available on some micro. c++ libs
+
 //portable nan etc. symbols, our compilers don't seem to agree on these guys, or the syntax is horrible.
 const extern double Infinity;
 const extern double Nan;

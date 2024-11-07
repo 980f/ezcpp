@@ -5,27 +5,29 @@
 const double Infinity = std::numeric_limits<double>::infinity();
 const double Nan = std::numeric_limits<double>::quiet_NaN();
 #else
+#include <cmath>
 //firmware platform didn't have a useful limits.h so ...
-union punter{ long long i64; double d;};
-const double Infinity=punter{0x7FFLL<<52}.d;
-const double Nan=     punter{0x7FF8LL<<48}.d;
-
-union pfunter{ unsigned i32; float f;};
-const float fInfinity=pfunter{0xFFU<<23}.f;
-const float fNan=     pfunter{0x1FFU<<22}.f;
+//union punter{  long long i64; double d;};
+const double Infinity=INFINITY;//punter{.i64= 0x7FFLL<<52}.d;
+const double Nan=NAN;//punter{.i64=0x7FF8LL<<48}.d;
+//
+//union pfunter{ int i32; float f;};
+//const pfunter fInfinity={.i32 =0xFFU<<23};
+//const pfunter fNan=     {.i32 =0x1FFU<<22};
 #endif
+
 
 extern "C" {
 //stubs.cpp keeps on getting lost, inline those here weakly:
 
 /** @returns @param arg*num/denom rounded and overflow managed (internal 64 bit temps)  */
-u32 muldivide(u32 arg, u32 num, u32 denom) WEAK;
-u32 muldivide(u32 arg, u32 num, u32 denom){
+unsigned muldivide(u32 arg, u32 num, u32 denom) WEAK;
+unsigned muldivide(u32 arg, u32 num, u32 denom){
   return rate(arg*num,denom);
 }
 
-int log2Exponent(u32 number) WEAK;
-int log2Exponent(u32 number){
+unsigned log2Exponent(u32 number) WEAK;
+unsigned log2Exponent(u32 number){
   int exponent=-1;
   while(number){
     ++exponent;

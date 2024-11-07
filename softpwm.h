@@ -35,7 +35,7 @@ public:
 
 public:
   //since onDone is virtual we make this virtual also. We should try to replace that with a function member.
-  virtual void onToggle(bool on){
+  virtual void onToggle(bool /*on*/){
     // a hook, overload with a pin toggle to make a PWM output.
   }
 

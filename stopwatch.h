@@ -28,6 +28,7 @@ public:
 
 class StopWatch:public StopWatchCore {
 public:
+  using StopWatchCore::StopWatchCore;
   /** timestamp reported as seconds since roughly the start of the application */
   double asSeconds(const TimeValue);
   /** @returns elasped time and restarts interval. Use this for cyclic sampling. @param absolutely if not null gets the absolute time reading used in the returned value.*/
@@ -36,6 +37,9 @@ public:
   double elapsed(double *absolutely=0);
   /** @return seconds of absolute time of stop, == now if running*/
   double absolute();
+
+  /** @returns the number of cycles of frequency @param atHz that have @see elapsed() */
+  unsigned cycles(double atHz, bool andRoll=true);
 };
 
 

@@ -1,1 +1,9 @@
 c++ code for convenient things, such as "countof(array)" macro and other frequently used expressions.
+
+The master branch suffers from partial reconciliation with safely/cppext. 
+Repo safely/cppext is meant to function on systems like the raspberry pi as well as microcontrollers, and perhaps you should use that.
+
+
+V1 predates trying to coexist with safely/cppext.
+
+

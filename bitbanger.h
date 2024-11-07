@@ -4,7 +4,6 @@
 /** bit and bitfield setting and getting.*/
 #define URGENTLY __attribute__((always_inline))
 /** @returns byte address argument as a pointer to that byte */
-//URGENTLY //irritating to step through during debug.
 constexpr volatile unsigned * atAddress(const unsigned address){
   return reinterpret_cast<unsigned *>(address);
 }

@@ -1,2 +1,6 @@
 read each file for copyright or license.
 While I (andyh) authored most of these some other folk may have helped and someone might have added files found on the web.
+
+
+If you have compilation difficulties such as missing pieces please check github 980f/safely/cppext for an alternate version.
+The safely lib is written for systems with an OS, the ezcpp for microcontrollers, but everything in cppext should be able to function on a microcontroller, they are just not optimized for them.

@@ -21,7 +21,8 @@ inline bool isValid(unsigned index){
 /** marker class for an integer used as an array index or related value. Leave all in header file as we need to strongly urge the compiler to inline all this code  */
 struct Index {
   Index(unsigned raw):raw(raw){}
-
+  /** we can't rationalize whether default should be zero or Invalid, so we force each use to be explicit.*/
+  Index()=delete;
   unsigned raw;
 
   bool isOdd() const noexcept {
@@ -40,8 +41,15 @@ struct Index {
     return raw!=BadIndex;//replace this with ~raw!=0 if compiler can't figure that out on its own.  Or load/inc/ inspect Z bit of status.
   }
 
-  void clear() noexcept {
+//clear() actually made it invalid, such a bad name deserves to be removed
+  //  void clear() noexcept {
+//    raw=BadIndex;
+//  }
+
+  unsigned take() noexcept {
+    unsigned was=raw;
     raw=BadIndex;
+    return was;
   }
 
   /** @returns whether this is less than @param limit */

@@ -1,22 +1,21 @@
 #include "cstr.h"
-#include "string.h"
+#include "string.h" //strlen strcmp ...
+#include "char.h"
 
-
-Cstr::Cstr() : ptr(nullptr){
+Cstr::Cstr() : ptr(nullptr) {
   //#nada
 }
 
-Cstr::Cstr(TextKey target) : ptr(target){
+Cstr::Cstr(TextKey target) : ptr(target) {
   //#nada
 }
 
-Cstr::~Cstr(){
+Cstr::~Cstr() {
   //#need explicit instantiation for vtable to get emitted.
 }
 
-TextKey Cstr::operator =(TextKey ptr){
-  this->ptr = ptr;
-  return ptr;
+TextKey Cstr::operator=(TextKey otherptr) {
+  return ptr = otherptr;
 }
 
 TextKey Cstr::c_str() const noexcept {
@@ -28,12 +27,11 @@ Cstr::operator const char *() const noexcept {
 }
 
 bool Cstr::isTrivial() const noexcept {
-  return ptr==nullptr || *ptr==0;
+  return ptr == nullptr || *ptr == 0;
 }
 
 bool Cstr::nonTrivial() const noexcept {
   return ptr != nullptr && *ptr != 0;
-
 }
 
 unsigned Cstr::length() const noexcept {
@@ -41,57 +39,76 @@ unsigned Cstr::length() const noexcept {
 }
 
 bool Cstr::endsWith(char isit) const noexcept {
-  return *this[length()-1]==isit;
+  return nonTrivial() ? *this[length() - 1] == isit : false;//todo:search and if found and next is null return true, on null found false
 }
 
 bool Cstr::is(TextKey other) const noexcept {
-    if(ptr == other) {//same object
-      return true;
-    }
-    if(ptr == nullptr) {
-      return Cstr(other).isTrivial();
-    }
-    if(other == nullptr) {
-      return *ptr == 0;
-    }
-    return 0 == strcmp(ptr, other);
+  if (ptr == other) {//same object
+    return true;
+  }
+  if (ptr == nullptr) {
+    return Cstr(other).isTrivial();
+  }
+  if (other == nullptr) {
+    return *ptr == 0;
+  }
+  return 0 == strcmp(ptr, other);
 }
 
-char Cstr::operator [](const Index &index) const noexcept {
-  return (nonTrivial()&&isValid(index)) ? ptr[index]:0;
+char Cstr::operator[](const Index &index) const noexcept {
+  return (nonTrivial() && isValid(index)) ? ptr[index] : 0;
 }
 
 /** attempt to match the reasoning of the @see same() function with respect to comparing null strings and empty strings */
 int Cstr::cmp(TextKey rhs) const noexcept {
-  if(ptr) {
-    if(rhs) {
-      return strcmp(ptr,rhs);
+  if (ptr) {
+    if (rhs) {
+      return strcmp(ptr, rhs);
     } else {//rhs is nullptr
       return *ptr ? 1 : 0;
     }
   } else {//this wraps nullptr
     return Cstr(rhs).nonTrivial() ? -1 : 0;
   }
-} // Zstring::cmp
+}
+
+unsigned Cstr::asUnsigned(const char **tail) const noexcept {
+  if (nonTrivial()) {
+    unsigned acc = 0;
+    const char *s = ptr;
+    while (*s) {
+      if (!Char(*s).appliedDigit(acc)) {
+        break;
+      }
+      ++s;
+    }
+    if (tail) {
+      *tail = s;
+    }
+    return acc;
+  } else {
+    return 0;
+  }
+}
 
 bool Cstr::startsWith(TextKey other) const noexcept {
-  if(ptr == nullptr) {
+  if (ptr == nullptr) {
     return Cstr(other).isTrivial();
   }
-  if(ptr == other) {
+  if (ptr == other) {
     return true;
   }
-  if(other == nullptr) {//all strings start with nothing, for grep '*' case.
+  if (other == nullptr) {//all strings start with nothing, for grep '*' case.
     return true;
   }
   //could do the following with strlen and strncmp, but that is more execution. A variant of strcmp which returns the index of mismatch would be handy.
   const char *s(ptr);
-  while(char c = *other++) {
+  while (char c = *other++) {
     char m = *s++;
-    if(!m) {
+    if (!m) {
       return false;//other is longer than this
     }
-    if(c!=m) {
+    if (c != m) {
       return false;//mismatch on existing chars
     }
   }
@@ -99,7 +116,7 @@ bool Cstr::startsWith(TextKey other) const noexcept {
 } // Cstr::startsWith
 
 Index Cstr::index(char ch) const noexcept {
-  if(const char *candidate = chr(ch)) {
+  if (const char *candidate = chr(ch)) {
     return candidate - ptr;
   } else {
     return BadIndex;
@@ -107,7 +124,7 @@ Index Cstr::index(char ch) const noexcept {
 }
 
 Index Cstr::rindex(char ch) const noexcept {
-  if(const char *candidate = rchr(ch)) {
+  if (const char *candidate = rchr(ch)) {
     return candidate - ptr;
   } else {
     return BadIndex;
@@ -115,21 +132,21 @@ Index Cstr::rindex(char ch) const noexcept {
 }
 
 const char *Cstr::chr(int chr) const noexcept {
-  if(nonTrivial()) {
-    return strchr(ptr,chr);
+  if (nonTrivial()) {
+    return strchr(ptr, chr);
   } else {
     return nullptr;
   }
 }
 
 const char *Cstr::rchr(int chr) const noexcept {
-  if(nonTrivial()) {
-    return strrchr(ptr,chr);
+  if (nonTrivial()) {
+    return strrchr(ptr, chr);
   } else {
     return nullptr;
   }
 } // TextPointer::startsWith
 
-void Cstr::clear() noexcept{
+void Cstr::clear() noexcept {
   ptr = nullptr;
 }

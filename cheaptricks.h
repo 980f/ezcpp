@@ -2,16 +2,18 @@
 #define CHEAPTRICKS_H
 #include "eztypes.h"
 
-/** @returns whether @param flag is in the set @param flags. */
-bool isPresent(const char *flags, const char flag);
+/**
+ *  The items below with 'atomisable' in their description are snippets where an atomic test-and-change operation is expected.
+ *  As of the initial implementation such atomicity was never needed so we didn't actually apply <atomic> which wasn't around in 2012 when this pool of code was
+ * started.
+ */
 
-/** @see template of same name */
-bool changed(double&target, double newvalue);
 
-/** compares @param target to @param newvalue, @returns whether the previous value was different and if so assigns that value to the target.
- * the goal is for this to be an atomic operation on any truly multi-threaded system. */
 
-template <typename Scalar> bool changed(Scalar&target, Scalar newvalue){
+/** atomisable compare and assign
+ * @returns whether assigning @param newvalue to @param target changes the latter */
+template<typename Scalar1, typename Scalar2 = Scalar1> bool changed(Scalar1 &target, const Scalar2 &newvalue){
+  //attempt to cast newvalue to Scalar1 via declaring a local Scalar1 here wasn't universally acceptible, tried to implicitly construct and that can be expensive
   if(target != newvalue) {
     target = newvalue;
     return true;
@@ -20,72 +22,50 @@ template <typename Scalar> bool changed(Scalar&target, Scalar newvalue){
   }
 }
 
-/** clear a variable on block exit, regardless of how the exit happens, including exceptions */
-template <typename Scalar> class ClearOnExit {
-  Scalar&zipperatus;
-public:
-  ClearOnExit(Scalar & toBeCleared): zipperatus(toBeCleared){}
-  operator Scalar(void){
-    return zipperatus;
-  }
-
-  ~ClearOnExit (){
-    zipperatus = 0;
-  }
-};
+/** @returns whether assigning @param newvalue to @param target changes the latter. the compare is for nearly @param bits, not an exact number. If nearly the same then
+ * the assignment does not occur.
+ *  This is handy when converting a value to ascii and back, it tells you whether that was significantly corrupting.
+ */
+bool changed(double&target, double newvalue,int bits = 32);
 
 
-/** assign a value to variable on block exit, regardless of how the exit happens, including exceptions.
-  * NB: records value to use at time of this object's creation */
-template <typename Scalar> class AssignOnExit {
-  Scalar&zipperatus;
-  Scalar onexit;
-public:
-  AssignOnExit(Scalar & toBeCleared, Scalar onexit): zipperatus(toBeCleared), onexit(onexit){}
-  ~AssignOnExit (){
-    zipperatus = onexit;
-  }
-  /** access wrapped entity via this object, handy when wrapping a dynamically selected item */
-  operator Scalar() const {
-    return zipperatus;
-  }
-  /** @returns eventual value - present value , the change that will be imposed at exit */
-  Scalar delta(void){
-    return onexit - zipperatus;
-  }
-};
-
-/** form of AssignOnExit for use in a return statement: */
-template <typename Scalar> Scalar postAssign(Scalar&varb, Scalar value){
+/** marker for potential atomic value shift
+ * assign new value but return previous, kinda like value++
+ * X previous= postAssign<x>(thingy, newvalue);
+ * previous is value of thingy before the assignment, thingy has newvalue.
+ */
+template<typename Scalar> Scalar postAssign(Scalar&varb, Scalar value){
   Scalar was = varb;
   varb = value;
   return was;
 }
 
-/** form of ClearOnExit for use in a return statement: */
-template <typename Scalar> Scalar flagged(Scalar&varb) ISRISH;
-
-/** for test and clear, may eventually wrap atomic operation */
-template <typename Scalar> Scalar flagged(Scalar&varb) {
-  Scalar was = varb;
-  varb = 0;
-  return was;
+/** atomisable test-and-clear take a value, @returns @param varb's value then clears it.*/
+template<typename Scalar> Scalar take(Scalar&varb){//replaces all but boolean use of flagged.
+  return postAssign(varb,Scalar(0));
 }
 
-//custom instantiation for breakpointing on boolean change.
-inline bool flagged(bool &varb){
-  if(varb){
-    varb=0;
-    return true;
-  } else {
-    return false;
+/** given pointer to a pointer to something that was dynamically allocated delete that thing and null the pointer. This gets more consistent segfaults on use-after-free */
+template<typename Scalar> void Free(Scalar **p2p){
+  if(p2p) {
+    delete *p2p;
+    *p2p = nullptr;
   }
 }
 
-/** if @param varb is false sets it to true and @returns true else return false.*/
+/** originally was the same code as the newer 'take' but since the code was found duplicated in another file the name wasn't quote right.
+ * 'flagged' is still a very good name for the boolean implementation of take, so we rework it thusly:
+ */
+bool flagged(bool &varb) ISRISH; //mark as needing critical optimization
+inline bool flagged(bool &varb){
+  return take(varb);
+}
+
+/** atomisable test and set
+ * if arg is false set it to true and return true else return false.*/
 inline bool notAlready(bool &varb){
-  if(!varb){
-    varb=true;
+  if(!varb) {
+    varb = true;
     return true;
   } else {
     return false;
