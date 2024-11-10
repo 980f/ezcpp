@@ -29,17 +29,20 @@ typedef int16_t s16;
 typedef int32_t s32;
 typedef int64_t s64;
 
+//sometimes you need to substitute in two steps to get nested substitutions
+#define MACRO_cat(a, b) a##b
+
 //for when you have to do something sneaky:
 #define pun(type, lvalue) (*reinterpret_cast <type *> (&(lvalue)))
 
 /**for when you want to live dangerously.
    We use the convention that all references have been confirmed non-null.
    only use this when you are feeding an &(expression) */
-#define NullRef(type) (*reinterpret_cast <type *> (0))
+#define NullRef(type) (*reinterpret_cast <type *> (nullptr))
 
 
 //lord it would be nice if C would make a standard operator for this:
-#define countof(array) (sizeof(array) / sizeof(array[0]))
+#define countof(array) (sizeof(array) / sizeof(*array))
 
 //in case some other compiler is used someday, this is gcc specific:
 #define PACKED __attribute__ ((packed))
@@ -52,7 +55,8 @@ typedef int64_t s64;
 #endif
 
 //a function suitable for handling interrupts:
-typedef void (*Handler)(void);
+// typedef void (*Handler)();
+using Handler=void(*)();
 
 //note: the linker is the agent that makes this happen. It fails if your linker script leaves out SORT(...)
 // creates section chunks like: .text._GLOBAL__sub_I.30000_startup and more importantly .init_array.30000 to call the previous which didn't actually need to be marked.

@@ -1,5 +1,4 @@
-#ifndef ONEXIT_H
-#define ONEXIT_H
+#pragma once
 
 /** arrange to do things when exiting block scope */
 
@@ -8,7 +7,7 @@ template <typename Scalar> class ClearOnExit {
   Scalar&zipperatus;
 public:
   ClearOnExit(Scalar & toBeCleared): zipperatus(toBeCleared){}
-  operator Scalar(void){
+  operator Scalar(){
     return zipperatus;
   }
 
@@ -33,16 +32,16 @@ public:
     return zipperatus;
   }
   /** @returns eventual value - present value , the change that will be imposed at exit */
-  Scalar delta(void){
+  Scalar delta(){
     return onexit - zipperatus;
   }
 };
 
 
-#if __has_include(<functional>)
-//#include <functional>
+// #if __has_include(<functional>)
+// #include <functional>
 struct OnExit {
-  using Lamda= void(*)(void);
+  using Lamda= void(*)();
   Lamda lamda;
   OnExit(Lamda dolater):lamda(dolater){
     //#nada
@@ -52,6 +51,5 @@ struct OnExit {
     lamda();
   }
 };
-#endif
+// #endif
 
-#endif // ONEXIT_H
