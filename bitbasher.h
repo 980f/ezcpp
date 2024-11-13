@@ -3,7 +3,6 @@
 //(C) 2017,2018 Andy Heilveil , github/980F
 
 
-
 /** bit and bitfield setting and getting.*/
 #define URGENTLY __attribute__((always_inline))
 
@@ -24,7 +23,7 @@
 #endif
 
 /** @returns byte address argument as a pointer to that byte */
-constexpr volatile unsigned * atAddress(const unsigned address){
+constexpr volatile unsigned *atAddress(const unsigned address) {
   return reinterpret_cast<unsigned *>(address);
 }
 
@@ -87,13 +86,11 @@ template<typename Scalar> bool assignBit(Scalar &pattern, unsigned bitnumber, bo
 }
 
 struct BitReference {
-  volatile unsigned &whole;//#renamed due to Arduino conflict, they have a global 'word' macro.
+  volatile unsigned &whole; //#renamed due to Arduino conflict, they have a global 'word' macro.
   unsigned mask;
 
   /** initialize from a memory address and bit therein. If address isn't aligned then bitnumber must be constrained to stay within the same word*/
-  BitReference(unsigned memoryAddress, unsigned bitnumber) :
-    whole(*atAddress(memoryAddress & ~3u)),
-    mask(1u << (31u & ((memoryAddress << 3u) | bitnumber))) {
+  BitReference(unsigned memoryAddress, unsigned bitnumber) : whole(*atAddress(memoryAddress & ~3u)), mask(1u << (31u & ((memoryAddress << 3u) | bitnumber))) {
     //now it is an aligned 32 bit entity
   }
 
@@ -176,8 +173,9 @@ template<unsigned lsb, unsigned msb, bool msbIsWidth = true> class BitFielder {
   enum {
     mask = msbIsWidth ? bitMask(lsb, msb) : fieldMask(msb, lsb) // aligned mask
   };
+
 public:
-  static unsigned extract(unsigned &item)  {
+  static unsigned extract(unsigned &item) {
     return (item & mask) >> lsb;
   }
 
@@ -185,7 +183,7 @@ public:
     return extract(item);
   }
 
-  static unsigned mergeInto(volatile unsigned &item,unsigned value)  {
+  static unsigned mergeInto(volatile unsigned &item, unsigned value) {
     unsigned merged = (item & ~mask) | ((value << lsb) & mask);
     item = merged;
     return merged;
@@ -199,6 +197,7 @@ template<unsigned lsb> class BitPicker {
   enum {
     mask = bitMask(lsb) // aligned mask
   };
+
 public:
   unsigned extract(unsigned &item) const {
     return (item & mask) >> lsb;
@@ -222,9 +221,9 @@ public:
    trying to bind the address as a template arg runs afoul of the address often not being knowable at compile time*/
 template<unsigned lsb, unsigned msb, bool msbIsWidth = false> class BitField : public BitFielder<lsb, msb, msbIsWidth> {
   unsigned &item;
+
 public:
-  BitField(unsigned &item) : item(item) {
-  }
+  BitField(unsigned &item) : item(item) {}
 
   operator unsigned() const {
     return BitFielder<lsb, msb>::extract(item);
@@ -269,6 +268,7 @@ template<unsigned pos> struct BitWad<pos> {
   enum {
     mask = 1 << pos
   };
+
 public:
   inline static unsigned extract(unsigned varble) {
     return (mask & varble);
@@ -301,9 +301,9 @@ public:
 };
 
 /** assemble a bit field, without using stl. */
-template<unsigned pos, unsigned ... poss> struct BitWad<pos, poss ...> {
+template<unsigned pos, unsigned ... poss> struct BitWad<pos, poss...> {
   enum {
-    mask = BitWad<pos>::mask | BitWad<poss ...>::mask
+    mask = BitWad<pos>::mask | BitWad<poss...>::mask
   };
 
 public:
@@ -328,7 +328,7 @@ public:
   }
 
   static unsigned splatter(unsigned packed) {
-    return ((packed & 1) << pos) | BitWad<poss ...>::splatter(packed);
+    return ((packed & 1) << pos) | BitWad<poss...>::splatter(packed);
   }
 
   template<typename Scalar> static Scalar mergeInto(Scalar &target, Scalar packed) {
@@ -337,5 +337,13 @@ public:
 };
 
 #define bits(...)  (BitWad<__VA_ARGS__>::mask)
+
+/**
+* @returns @param bits where @param mask is zero, alters @param bits to be zero where mask is zero */
+template<typename Scalar> Scalar split(Scalar &bits, Scalar mask) {
+  Scalar discards = bits & ~mask;
+  bits &= mask;
+  return discards;
+}
 
 #endif
