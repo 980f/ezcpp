@@ -10,7 +10,7 @@ void PolledTimer::check(){
   }
 }
 
-PolledTimer::PolledTimer(void){
+PolledTimer::PolledTimer(){
   running = 0;
   systicksRemaining = 0;
 }
@@ -21,7 +21,7 @@ PolledTimer::~PolledTimer(){
 }
 
 /** typically this is overloaded if latency is important.*/
-void PolledTimer::onDone(void){
+void PolledTimer::onDone(){
   running = 0;
 }
 
@@ -39,18 +39,18 @@ void PolledTimer::restart(float seconds){
   if(seconds<=0){
     return;
   }
-  restart(u32(seconds));
+  restart(seconds);
 }
 
 void PolledTimer::freeze(){
-  running = 0;//precludes isr touching remaining time, and onDone doesn't get called.
+  running = false;//precludes isr touching remaining time, and onDone doesn't get called.
 }
 
 ////////////////////////////
 
 bool CyclicTimer::hasFired(){
   //maydo: LOCK, present intended uses can miss a tick without harm so we don't bother.
-  ClearOnExit <u32> z(fired); //trivial usage of ClearOnExit, for testing that.
+  ClearOnExit z(fired); //trivial usage of ClearOnExit, for testing that.
   return fired != 0;
 }
 

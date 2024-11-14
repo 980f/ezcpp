@@ -17,19 +17,19 @@ protected:
   bool running; //changed from 'done' to 'running' so that we can init via joint ram clear rather than init code.
   Ticks systicksRemaining;
 public:
-  PolledTimer(void);
+  PolledTimer();
   virtual ~PolledTimer();//in case derived classes need significant destruction.
   virtual void restart(Ticks ticks);
   void restart(float seconds);//float (not double) as is often in time critical code.
   /** stops countdown without triggering onDone() */
   void freeze();
   //what the timer isr calls:
-  void check(void);
+  void check();
   /** called when systicksRemaining goes to 0.
    * Overload to have something done <B>within</B> the timer interrupt service routine */
-  virtual void onDone(void);
+  virtual void onDone();
   /** @returns whether this is no longer counting */
-  inline bool isDone() const{
+  bool isDone() const{
     return !running;
   }
 };
@@ -49,13 +49,13 @@ public:
     }
   }
 
-  bool hasFired(void);
+  bool hasFired();
 
-  operator bool (void){
+  operator bool (){
     return hasFired();
   }
 
-  void retrigger(void){
+  void retrigger(){
     //leave fired as is.
     PolledTimer::restart(period);
   }
@@ -66,6 +66,6 @@ public:
 
   /** called when systicksRemaining goes to 0.
    * Overload to have something done within the timer interrupt service routine */
-  virtual void onDone(void);
+  virtual void onDone();
 
 };
