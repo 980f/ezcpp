@@ -24,22 +24,26 @@ template <typename Scalar> class LimitedPointer {
 
     }
 
-    /** @returns whether next() will return an expected value, i.e. whether it makes sense to call next(). This is a weaker operation than the operator bool() version, for urgent loops where wellDefined() can be checked once. */
+    /** @returns whether next() will (most likely) return an actual value, i.e. whether it makes sense to call next(). This is a weaker operation than the operator bool() version, for urgent loops where wellDefined() can be checked once. */
     inline bool isValid()const {
       return pointer < end;
     }
 
+    /** @returns whether the block pointed to has at least one element */
     inline bool wellDefined() const {
-      return base != nullptr && end >= base;
+      return base != nullptr && end > base;
     }
 
-    /** @returns whether @see wellDefined() and @see isValid() */
-    inline operator bool() const {
+    bool hasNext() const {
       return wellDefined() && isValid();
+    }
+    /** @returns whether @see wellDefined() and @see isValid() */
+    operator bool() const {
+      return hasNext();
     }
 
     /** use like pointer */
-    inline Scalar &operator *() const {
+    Scalar &operator *() const {
       return isValid() ? *pointer : *base;
     }
 
@@ -51,6 +55,7 @@ template <typename Scalar> class LimitedPointer {
         return base; // on defective access point to the entity most likely to be noticed if trashed.
       }
     }
+
     /** @returns object offset by @param index relative to this pointer, but base object if index is out of range. */
     Scalar &operator [](int index) const {
       Scalar *proposed = pointer += index;
@@ -63,6 +68,9 @@ template <typename Scalar> class LimitedPointer {
       }
     }
 
+    /** @returns a reference to an element of the block, IFFI the block is valid which is NOT checked.
+ * This is only safe to use if you hae already tested wellDefined() && isValid(), which is what
+     */
     Scalar &next() {
       if (*this) {
         return *pointer++;
@@ -115,7 +123,7 @@ template <typename Scalar> class LimitedPointer {
       pointer = base;
       return *this;
     }
-    /** @return pointer to an entity in the defined range, or nullptr.
+    /** @returns pointer to an entity in the defined range, or nullptr.
        NB: Ignores current position of 'this', giving read access to the internal buffer pointer. @see operator [] for relative neighbor.*/
     Scalar *neighbor(unsigned index)const {
       if (!wellDefined()) {
