@@ -1,16 +1,21 @@
 #ifndef QUADRATURECOUNTER_H
 #define QUADRATURECOUNTER_H
 
-/** quadrature table:
- *      ___     ___
- *  ___/   \___/
- *        ___     ___
- *  _____/   \___/
+/** quadrature table, forward motion
+ *       ___     ___
+ * A ___/   \___/
+ *         ___     ___
+ * B _____/   \___/
  *
- *  A:HL=++
- *  A:LH=++
- *  B:HH=++
- *  B:LL=++
+    if B is low when A goes high we increment.
+    if B is high when A goes high we decrement.
+    if B is high when A goes low we increment.
+    if B is low when A goes low we decrement.
+    if A is high when B goes high we increment.
+    if A is low when B goes high we decrement.
+    if A is low when B goes low we increment.
+    if A is high when B goes low we decrement.
+
  */
 
 /** the counting logic of quadrature decoding. To be called by some other
