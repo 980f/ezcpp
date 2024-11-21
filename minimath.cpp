@@ -55,31 +55,32 @@ int ilog10(u32 value){
 //uround and sround are coded to be like they will in optimized assembly
 u16 uround(float scaled){
   if(scaled < 0.5) { //fp compares are the same cost as integer.
-    return 0;
+    return 0; //for all negatives and positives less than 1/2
   }
   scaled *= 2; //expose rounding bit
-  if(scaled >= 131071) {
+  if(scaled >= 131071.0f) {
     return 65535;
   }
-  int eye = int(scaled); //truncate
-  return u16(eye / 2);
+  unsigned eye = unsigned(scaled); //truncate
+  return u16((eye+1) / 2);//bugix: actually round rather than truncate!
 } /* uround */
 
 s16 sround(float scaled){ //#this would be so much cleaner and faster in asm!
-  if(scaled > 32766.5) {
+  if(scaled > 32766.5f) {
     return 32767;
   }
   if(scaled < -32767.5) {
     return -32768;
   }
-  scaled += scaled >= 0 ? 0.5 : -0.5; //round away from 0. aka round the magnitude.
-  return int(scaled);
+  scaled *= 2; //expose rounding bit
+  int eye=int(scaled);
+  return int((scaled+1)/2);
 }
 
 int modulus(int value, unsigned cycle){
   /* since most use cases are within one cycle we use add/sub rather than try to make divide work.*/
   if(cycle<=1){
-    return value;
+    return value; //GIGO
   }
   while(value < 0) {
     value += cycle;
@@ -216,6 +217,15 @@ double logRatio(u32 over, u32 under){
 }
 #endif /* if logoptimized */
 
+unsigned removeTrailingZeroes(unsigned wantodd) { //weak because some processors have an instruction for this.
+  unsigned zeroes=0;
+  while((wantodd&1)==0) {
+    wantodd>>=1;
+    ++zeroes;
+  }
+  return zeroes;
+}
+
 /** n!/r! = n*(n-1)..*(n-r+1) */
 u32 Pnr(unsigned n, unsigned  r){
   if(r<=0){//frequent case and avert naive divide by zero
@@ -233,7 +243,7 @@ u32 Pnr(unsigned n, unsigned  r){
 
 ///** n!/r!(n-r)! = n*(n-1)..*(n-r+1) / r! */
 u32 CnrSimple(unsigned n, unsigned  r){
-  if(r<=0){//frequent case and avert naive divide by zero
+  if(r==0){//frequent case and avert naive divide by zero
     return 1;
   }
   if(r==1){//fairly frequent case
@@ -244,22 +254,22 @@ u32 CnrSimple(unsigned n, unsigned  r){
   while(r-->2){
     den*=r;
   }
-  return num/den;//#zero is checked
+  return num/den;//#zero denom has already been checked
 }
 
-
-
 /** n!/r!(n-r)! = n*(n-1)..*(n-r+1)/r*(r-1)..
-This is done in a complicated fashion to increase the range over what could be done if the factorials were computed then divided.
+ * This is done in a complicated fashion to increase the range over what could be done if the factorials were computed then divided.
+ * if we have a cheap way of testing "divisible by 3" we could eliminate those as well, ditto for all other prime factors.
+Now that I am thinking about it ... we have cyclic counters and can count how many cycles occur
 */
 u32 Cnr(unsigned n, unsigned  r){
-  if(r<=0){//frequent case and avert naive divide by zero
+  if(r==0){//frequent case and avert naive divide by zero
     return 1;
   }
   if(r==1){//fairly frequent case
     return n;
   }
-  if(r==2){
+  if(r==2){//also fairly frequent
     //divide the even number by 2, via shift.
     if(n&1){
       return n*((n-1)>>1);
@@ -274,23 +284,18 @@ u32 Cnr(unsigned n, unsigned  r){
   int twos=0;
   while(r-->0){
     unsigned nterm=--n;
-    while(0==(nterm&1)){//50% of the time we loop just once, 25% of the time twice 12.5% of the time 3 times ...
-      ++twos;
-      nterm>>=1;
-    }
-    num*=nterm;
+    twos += removeTrailingZeroes(nterm);
+    num *= nterm;
     unsigned rterm=r;
-    while(0==(rterm&1)){
-      --twos;//these discarded twos are in the denominator
-      rterm>>=1;
-    }
-    denom*=rterm;
+    twos -= removeTrailingZeroes(rterm);
+    denom *= rterm;
   }
-  //twos should be a small
+  //twos should be a small number
+  //todo: check that 'twos' is in legal range for a shift instruction, else out of range becomes garbage rather than out of range.
   if(twos>=0){
-    num<<=twos;
+    num <<= twos;
   } else {
-    denom<<=-twos;
+    denom <<= -twos;
   }
   return rate(num,denom);
 }

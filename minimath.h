@@ -1,15 +1,19 @@
 #pragma once
+#include <eztypes.h>
 
 //portable nan etc. symbols, our compilers don't seem to agree on these guys, or the syntax is horrible.
 const extern double Infinity;
 const extern double Nan;
+
 /** specifically nan, not infinity, @see isSignal() */
 bool isNan(double d);
+
 /** isNan(int) exists to allow templates to use isNan for floats without fancy type testing*/
 inline bool isNan(int){
   return false;
 }
 
+/** maydo: use our ~0 convention here */
 inline bool isNan(unsigned){
   return false;
 }
@@ -76,8 +80,9 @@ inline int polarity(bool positive){
   return positive ? 1 : -1;
 }
 
-/** @return negative if lhs is < rhs, 0 if lhs==rhs, +1 if lhs>rhs .
- *  to sort ascending if returns + then move lhs to higher than rhs.
+/** @returns -1 if @param lhs is < @param rhs, 0 if lhs==rhs, +1 if lhs>rhs .
+ *  If you are using this to sort ascending if returns + then move lhs to higher than rhs.
+ *  Someday this will use <=> but we aren't at that level of C++ for all processors that this code runs on.
  */
 template< typename mathy > int compareof(mathy lhs,mathy rhs){
   return signof(lhs - rhs);
@@ -103,15 +108,20 @@ inline int half(int sum) {
   return (sum + 1) / 2;
 }
 
-/** quantity of bins needed to hold num items at denom items per bin*/
+/** @returns quantity of bins needed to hold @param num items at @param denom items per bin.
+ * If denom is 0 you get back either 1 or 0 depending upon num!=0. This makes sense for the most commonly encountered pathological cases. */
 template<typename Integer,typename Inttoo> Integer quanta(Integer num, Inttoo denom){
+  //todo:0 insist on unsigned types.
   if (denom == 0) {
     return num == 0 ? 1 : 0; //pathological case
   }
+  //todo:0 is typeof num is signed do what 'half' does.
   return (num + denom - 1) / denom;
 }
 
-/** protect against garbage in (divide by zero) note: 0/0 is 0 */
+/** @returns @param num / @param denom, protecting against garbage in (divide by zero) note: 0/0 is 0, not 1
+ * If you know you are using integers then consider using @see rateof @see quanta instead, one of those is more likely to be what you want.
+ */
 template <typename NumType,typename DenType=NumType>  double ratio(NumType num, DenType denom) {
   if (denom == 0) { //pathological case
     return num; //attempt to make 0/0 be 1 gave 1 for ratio of unmeasured items, was not a good choice  may someday return signed inf.
@@ -154,7 +164,7 @@ inline int fexp(double d) ISRISH;
 inline int fexp(double d) {
   int ret;
   if (d == 0.0) { //frexp returns 0, which makes it look bigger than numbers between 0 and 1.
-    return -1023;//one less than any non-zero number will give (this constant is ieee64 specific)
+    return -1023;//this value is one less than any non-zero number will give (this constant is ieee64 specific)
   }
   frexp(d, &ret);
   return ret;
@@ -193,9 +203,13 @@ template <typename mathy> mathy squared(mathy x) {
   return x * x;
 }
 
+unsigned removeTrailingZeroes(unsigned wantodd) WEAK ; //weak because some processors have an instruction for this.
+
+
 /** n!/r! = n*(n-1)..*(n-r+1)
 */
 uint32_t Pnr(unsigned n, unsigned  r);
+/** n!/(r!(n-r)!)*/
 uint32_t Cnr(unsigned n, unsigned  r);
 
 
