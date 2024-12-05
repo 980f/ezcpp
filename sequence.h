@@ -12,13 +12,31 @@ public:
   virtual bool hasNext(void) = 0;
   virtual Content&next(void) = 0;
 
-  virtual void skip(unsigned int qty = 1){
+  virtual unsigned skip(unsigned int qty = 1){
     while(hasNext() && qty-- > 0) {
       next();
     }
+    return qty;
   }
 
 }; // class Sequence
+
+/** differs from plain Sequence in the next() returns object via copying, not reference */
+template<typename Content> class ReadonlySequence {
+public:
+  virtual bool hasNext() = 0;//const removed so that hasNext's can do caching lookaheads
+  virtual const Content next() = 0;
+
+
+  virtual unsigned skip(unsigned int qty = 1){
+    while(hasNext() && qty-- > 0) {
+      next();
+    }
+    return qty;
+  }
+
+}; // class ReadonlySequence
+
 
 /** @deprecated, couldn't figure out how to cast the first use case for this. */
 template<typename Content,typename Wrapped> class ConvertingSequence: public Sequence<Content>{
@@ -38,20 +56,6 @@ public:
   }
 
 };
-
-/** differs from plain Sequence in the next() returns object via copying, not reference */
-template<typename Content> class ReadonlySequence {
-public:
-  virtual bool hasNext() = 0;//const removed so that hasNext's can do caching lookaheads
-  virtual Content next() = 0;
-
-  virtual void skip(unsigned int qty = 1){
-    while(hasNext() && qty-- > 0) {
-      next();
-    }
-  }
-
-}; // class ReadonlySequence
 
 
 template<typename Content> class PeekableSequence : public Sequence<Content> {

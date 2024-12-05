@@ -1,7 +1,6 @@
 #ifndef ORDINATOR_H
 #define ORDINATOR_H
 
-#include "index.h"
 /** utility class for generator a sequence of integers up to a limit.
  * This is built for the needs of the Indexer<> class, which explains the comments and some curious design choices.
  */
@@ -14,13 +13,11 @@ public:
 
   /** create a range of sorts */
   Ordinator(unsigned length, unsigned pointer = 0 ) : pointer(pointer),length(length){
-    if(pointer>length) {//bad value: will normalize to 'consumed'. The cast to unsigned makes negative numbers HUGE.
+    if(pointer>length) {//bad value: will normalize to 'consumed'.
       this->pointer = length;
     }
   }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-compare"
   /** create a subset of @param other. In all cases pointer will be 0, you can't back this baby up past the beginning of the other.
    * if @param clip<0 then the 'used' subset, shortened by the ~clip value (~0 gets all, ~1 loses the most recent one)
    * if @param clip>=0 then the 'unused' subset, skipping clip  items (presuming caller moves pointer to the coordinate place)
@@ -42,7 +39,6 @@ public:
     }
     //else constructor init list has taken care of it.
   }
-#pragma GCC diagnostic pop
 
   Ordinator(const Ordinator &other)=default;//simple copy
 
@@ -57,34 +53,33 @@ public:
   }
 
   /** @returns whether pointer is not past the last */
-  bool hasNext(void) {
-    return length > 0 && pointer < length;
+  bool hasNext() {
+    return pointer < length;
   }
 
   /** @returns whether pointer is not at first element */
-  bool hasPrevious(void) const {
+  bool hasPrevious() const {
     return pointer > 0;
   }
 
   /** available for write, or if just snapped available for parsing*/
-  unsigned freespace(void) const {
+  unsigned freespace() const {
     return length - pointer;
   }
 
   /** available for block write*/
   bool stillHas(unsigned howmany) const {
-    return freespace() >= howmany;
+    return pointer + howmany < length;
   }
 
-  //NB: a cast to integer was annoying to derived types, from which this class is an extracted base.
-  unsigned ordinal(void) const {
+  unsigned ordinal() const {
     return pointer;
   }
 
-  /**AFTER a next this is the index of what that next() returned.
+  /** AFTER a next this is the index of what that next() returned.
    * @returns ordinal of item that next() returned, ~0 if next() never called.
 */
-  unsigned present(void ) const {
+  unsigned present() const {
     return pointer - 1;
   }
 
@@ -93,7 +88,7 @@ public:
    * the default will result in a rewind to the beginning.
    * @return this
    */
-  void rewind(unsigned backup=BadLength){
+  void rewind(unsigned backup = ~0){
     if(backup <= pointer) {
       pointer -= backup;
     } else {
@@ -109,30 +104,38 @@ public:
   }
 
   /** ensure subsequent hasNext() reports 'no' */
-  void dump(){
+  void discardRest(){
     pointer = length; //our normal one-past-end state, to make sure multiple skips don't wrap.
   }
 
-  /** remove at most the given number of items preceding next.
-   *  first use is processing escaped chars in a string in buffer.h, probably not much use elsewhere.
-   */
-  void remove(unsigned amount){
-    if(amount > pointer) {
-      amount = pointer;
-    }
-    pointer -= amount;
-    length -= amount;//todo:2 this is probably a bug for SOME uses, the buffer doesn't change size just cause we discard an entry.
-  }
+// name led to wrong use. Wait until needed to bring back, with a better name.
+//  /** remove at most the given number of items preceding next.
+//   *  first use is processing escaped chars in a string in buffer.h, probably not much use elsewhere.
+//   * this alters the concept of the start of buffer, do not use this when the ordinator is preserving an allocation amount.
+//   */
+//  void remove(unsigned amount){
+//    if(amount > pointer) {
+//      amount = pointer;
+//    }
+//    pointer -= amount;
+//    length -= amount;
+//  }
 
-  /** if other isn't at its start then we get the part past, else we get a copy */
-  void grab(const Ordinator &other){
-    if(other.pointer>0) {//want front end.
+  /** this is halfinteral preceding other's next */
+  void copyHead(const Ordinator &other){
       length = other.pointer;
       pointer = 0;
-    } else { //was already rewound and truncated
-      length = other.length;
-      pointer = other.pointer;
-    }
+  }
+
+  void copyTail(const Ordinator &other){
+    pointer = other.pointer;
+    length = other.freespace();
+  }
+
+  /** sets this to used part of other, truncating tail of other.*/
+  void takeTail(Ordinator &other){
+    copyTail(other);//map to remainder
+    other.length = other.pointer;//truncate to used part
   }
 
 }; // class Ordinator

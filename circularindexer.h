@@ -1,7 +1,6 @@
-#ifndef CIRCULARINDEXER_H
-#define CIRCULARINDEXER_H
+#pragma once
 
-/**a useful subset of a fifo, such as for memory for a moving average */
+/** a useful subset of a fifo, such as for memory for a moving average */
 template <typename Content> class CircularIndexer {
 protected:
   unsigned pointer;
@@ -14,14 +13,13 @@ public:
   }
 
   /** @returns true once per cycle, call before next() and if true then next() will return item 0*/
-  inline bool oncePerCycle(void) const {
+  bool oncePerCycle() const {
     return pointer == 0;
   }
 
   /** @returns current and bumps pointer*/
   virtual Content&next(void){
     unsigned was = pointer++;
-
     if(pointer >= length) {
       pointer = 0;
     }
@@ -35,26 +33,24 @@ public:
     --pointer;
   }
 
-  /** you should avoid using this for anything except diagnostics*/
-  Content */*wanted a pointer that couldn't be ++'d:const*/ internalBuffer(void) const {
+  /** you should avoid using this for anything except diagnostics */
+  Content */*wanted a pointer that couldn't be ++'d:const*/ internalBuffer() const {
     return buffer;
   }
 
   /** @return what next will return, but without moving pointer*/
-  virtual Content&peek(void) const {
+  virtual Content&peek() const {
     return buffer[pointer < length ? pointer : 0];
   }
 
   /**@return reference to item most likely delivered by last call to next()*/
-  Content&previous(void){
+  Content&previous() const {
     return buffer[(pointer == 0 ? length : pointer) - 1];
   }
 
   /** a variety of 'flush' */
-  void init(void){
+  void reset(){
     pointer = 0;
   }
 
 };
-
-#endif // CIRCULARINDEXER_H

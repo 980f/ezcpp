@@ -7,65 +7,24 @@
 template <typename Scalar> class LimitedPointer {
     Scalar *pointer;
     Scalar *base;
-    Scalar *end; // actually one past the end
+    Scalar *end; // actually one past the end, halfopen interval
 
   public:
-    LimitedPointer(Scalar *base, unsigned quantity):
-      base(base) {
-      pointer = base;
-      if (base == nullptr) {
-        end = nullptr;
-      } else {
-        end = &(base[quantity]);
-      }
-    }
-
-    LimitedPointer(): LimitedPointer(nullptr, 0) {
-
-    }
+    LimitedPointer(Scalar *base, unsigned quantity):base(base), pointer(base), end( base ? &(base[quantity]:nullptr) {}
+    LimitedPointer(): LimitedPointer(nullptr, 0) {}
 
     /** @returns whether next() will (most likely) return an actual value, i.e. whether it makes sense to call next(). This is a weaker operation than the operator bool() version, for urgent loops where wellDefined() can be checked once. */
-    inline bool isValid()const {
+    bool isValid() const {
       return pointer < end;
     }
 
     /** @returns whether the block pointed to has at least one element */
-    inline bool wellDefined() const {
-      return base != nullptr && end > base;
+    bool wellDefined() const {
+      return base && end > base;
     }
 
     bool hasNext() const {
       return wellDefined() && isValid();
-    }
-    /** @returns whether @see wellDefined() and @see isValid() */
-    operator bool() const {
-      return hasNext();
-    }
-
-    /** use like pointer */
-    Scalar &operator *() const {
-      return isValid() ? *pointer : *base;
-    }
-
-    /** @returns the recent selection, or the 1st, which might be nullptr */
-    operator Scalar *() const {
-      if (isValid()) {
-        return pointer;
-      } else {
-        return base; // on defective access point to the entity most likely to be noticed if trashed.
-      }
-    }
-
-    /** @returns object offset by @param index relative to this pointer, but base object if index is out of range. */
-    Scalar &operator [](int index) const {
-      Scalar *proposed = pointer += index;
-      if (proposed >= end) {
-        return *base;
-      } else if (proposed < base) {
-        return *base;
-      } else {
-        return* proposed;
-      }
     }
 
     /** @returns a reference to an element of the block, IFFI the block is valid which is NOT checked.
@@ -79,10 +38,42 @@ template <typename Scalar> class LimitedPointer {
       }
     }
 
+    /** @returns whether @see wellDefined() and @see isValid() */
+    operator bool() const {
+      return hasNext();
+    }
+
+    /** use like pointer. If object is invalid expect an NPE in caller code */
+    Scalar &operator *() const {
+      return isValid() ? *pointer : *base;
+    }
+
+    /** @returns the recent selection, or the 1st, which might be nullptr */
+    operator Scalar *() const {
+      if (isValid()) {
+        return pointer;
+      } else {
+        return base; // on defective access point to the entity most likely to be noticed if trashed.
+      }
+    }
+
+    /** @returns object offset by @param index relative to this pointer, but base object if index is out of range.
+ * not using unsigned as index -1 is 'previous' and that is a valid concept for this guy */
+    Scalar &operator [](int index) const {
+      Scalar &proposed = pointer[index];
+      if (&proposed >= end) {
+        return *base;
+      } else if (&proposed < base) {
+        return *base;
+      } else {
+        return proposed;
+      }
+    }
+
+
     /** moves pointer given amount, limiting to one past the end or to the first if out of range. */
     LimitedPointer &operator +=(int amount) {
       Scalar *proposed = pointer + amount;
-
       if (proposed >= end) {
         pointer = end;
       } else if (proposed < base) {
@@ -125,7 +116,7 @@ template <typename Scalar> class LimitedPointer {
     }
     /** @returns pointer to an entity in the defined range, or nullptr.
        NB: Ignores current position of 'this', giving read access to the internal buffer pointer. @see operator [] for relative neighbor.*/
-    Scalar *neighbor(unsigned index)const {
+    Scalar *neighbor(unsigned index) const {
       if (!wellDefined()) {
         return nullptr;
       }

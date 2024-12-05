@@ -2,10 +2,10 @@
 #define QUADRATURECOUNTER_H
 
 /** quadrature table, forward motion
- *       ___     ___
- * A ___/   \___/
- *         ___     ___
- * B _____/   \___/
+ *       ____      ___
+ * A ___/    \____/
+ *         ____      ___
+ * B _____/    \____/
  *
     if B is low when A goes high we increment.
     if B is high when A goes high we decrement.
@@ -16,6 +16,12 @@
     if A is low when B goes low we increment.
     if A is high when B goes low we decrement.
 
+2 bit Grey-code: 0,1,3,2 as lsbs is lsb-straight = lsb-grey^msb-grey, msb-straight = msb-grey
+  If we are using A as the clock channel while sampling B for direction then A is the 2 bit lsb, B is the 2 bit msb.
+
+  If we are counting on either edge of A we advance the counter 2 for every edge, if we count just one edge of A (rising please) then we jump 4 for each count.
+  Regardless of which edges we counted we use the 2 signals, grey code corrected, as the 2 lsbs of the position.
+
  */
 
 /** the counting logic of quadrature decoding. To be called by some other
@@ -23,7 +29,8 @@
 class QuadratureCounter {
 public: // eventually protect
   int location = 0;
-  int dirstep = 0;
+  int dirstep = 0;//birection and magnitude of 1,2,4
+  bool homed; //whether position is actually known
 
 public:
   /** one arbitrarily selects one input as primary, which designation defines
@@ -68,6 +75,6 @@ public:
   void rollover(unsigned count) { location += dirstep * count; }
 
   /** reset only applies to location, not to any modality of the counting. */
-  void reset() { location = 0; }
+  void set(int provided=0) { location = provided; homed=true; }
 };
 #endif // QUADRATURECOUNTER_H
