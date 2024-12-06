@@ -1,10 +1,8 @@
 #pragma once
-
-#include "eztypes.h"
-#include "cheaptricks.h"
+#include <cstdint>
 
 /** marker class for timing services */
-typedef u32 Ticks;
+using Ticks= uint32_t;
 /** shared timer services. 
   * an isr will determine that the given time has expired, setting the done bit.
   * but the interested code will have to look at each object to determine that the event occurred OR
@@ -16,6 +14,7 @@ class PolledTimer {
 protected:
   bool running; //changed from 'done' to 'running' so that we can init via joint ram clear rather than init code.
   Ticks systicksRemaining;
+
 public:
   PolledTimer();
   virtual ~PolledTimer();//in case derived classes need significant destruction.
@@ -41,9 +40,9 @@ public:
 class CyclicTimer : public PolledTimer {
 protected:
   Ticks period;
-  u32 fired;
+  unsigned fired;
 public:
-  CyclicTimer(Ticks period,bool andStart=false):period(period){
+  explicit CyclicTimer(Ticks period, bool andStart = false) : period(period), fired(0) {
     if(andStart){
       retrigger();
     }
@@ -51,7 +50,7 @@ public:
 
   bool hasFired();
 
-  operator bool (){
+  operator bool() { // NOLINT
     return hasFired();
   }
 
@@ -60,12 +59,19 @@ public:
     PolledTimer::restart(period);
   }
 
-  void restart(Ticks ticks){
+  void restart(Ticks ticks) override {
     PolledTimer::restart(period = ticks);
   }
 
   /** called when systicksRemaining goes to 0.
    * Overload to have something done within the timer interrupt service routine */
-  virtual void onDone();
-
+  void onDone() override;
 };
+
+
+/** a server that will update all registered timers.
+ * You must arrange for it to get called with each tick */
+extern void PolledTimerServer();
+//registration is compile time, your object must be static to be party to this service.
+#define RegisterTimer(name) Register(PolledTimer,name)
+

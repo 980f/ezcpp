@@ -2,7 +2,12 @@
 #define LIMITEDPOINTER_H
 #include <stdint.h>
 
-/** a pointer into an externally allocated array of some type. Given that range this keeps itself within that range (if you let it) */
+/** a pointer into an externally allocated array of some type. Given that range this keeps itself within that range (if you let it).
+  The class is slightly inconsistent in that if you run off the end you get the beginning from then on (if there is one),
+  although under many conditions you will get slapped with a SEGV/NPE if you have ignored the validity checking access methods.
+
+  This allows an embedded program to keep on running with a defect that you will hopefully notice rather than going tits up in code that might not matter much.
+*/
 
 template <typename Scalar> class LimitedPointer {
     Scalar *pointer;
@@ -10,8 +15,12 @@ template <typename Scalar> class LimitedPointer {
     Scalar *end; // actually one past the end, halfopen interval
 
   public:
-    LimitedPointer(Scalar *base, unsigned quantity):base(base), pointer(base), end( base ? &(base[quantity]:nullptr) {}
-    LimitedPointer(): LimitedPointer(nullptr, 0) {}
+  /** using a signed quantity so that an all-ones marker value for 'none' works the same as 0 */
+    LimitedPointer(Scalar *theBase, size_t quantity = 0):
+      base( (quantity > 0) ? theBase : nullptr),
+      end( base&&(quantity > 0) ? &(base[quantity]) : nullptr {
+      pointer = base;
+    }
 
     /** @returns whether next() will (most likely) return an actual value, i.e. whether it makes sense to call next(). This is a weaker operation than the operator bool() version, for urgent loops where wellDefined() can be checked once. */
     bool isValid() const {
@@ -75,7 +84,7 @@ template <typename Scalar> class LimitedPointer {
     LimitedPointer &operator +=(int amount) {
       Scalar *proposed = pointer + amount;
       if (proposed >= end) {
-        pointer = end;
+        pointer = end; //value here and below are chosen for easy debug of most common fault cases.
       } else if (proposed < base) {
         pointer = base;
       } else {

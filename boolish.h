@@ -32,12 +32,13 @@ struct BoolishRef {
   }
 };
 
-/*bool flagged(const BoolishRef &varb) ISRISH; //mark as needing critical optimization */
-inline bool flagged(BoolishRef &varb){
-  bool was=varb;
-  varb=false;
-  return was;
-}
+//found elsewhere, this copy was plugging a temporary loss of other file.
+// /*bool flagged(const BoolishRef &varb) ISRISH; //mark as needing critical optimization */
+// inline bool flagged(BoolishRef &varb){
+//   bool was=varb;
+//   varb=false;
+//   return was;
+// }
 
 
 /** a const-able reference to a non-const bool. */

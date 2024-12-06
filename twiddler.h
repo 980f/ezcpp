@@ -3,7 +3,7 @@
 #if !defined (EZ_NoFloatingPoint)
 #define EZ_NoFloatingPoint true
 #endif
-/** if this is true ensure that no references are made to floating point mth at all*/
+/** if this is true ensure that no references are made to floating point math at all*/
 const bool noFloat=EZ_NoFloatingPoint;
 
 /** first use was software PWM. Origin is from Bresneham Line Draw, as refined by 980F

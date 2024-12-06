@@ -6,4 +6,5 @@ Repo safely/cppext is meant to function on systems like the raspberry pi as well
 
 V1 predates trying to coexist with safely/cppext.
 
-
+avrduino branched from v1 as the avr gcc is way behind other versions, 4.9.2 when the branch was created.
+It was been merged into master around 2024dec6

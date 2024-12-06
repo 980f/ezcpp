@@ -50,7 +50,7 @@ bool ContinuedFractionRatioGenerator::step(){
   return false;
 } // ContinuedFractionRatioGenerator::step
 
-double ContinuedFractionRatioGenerator::approximation(){
+double ContinuedFractionRatioGenerator::approximation() const{
   return ratio(double(numerator()),double(denominator()));
 }
 
@@ -62,7 +62,7 @@ double ContinuedFractionRatioGenerator::best(){
 } // ContinuedFractionRatioGenerator::step
 
 bool ContinuedFractionRatioGenerator::split(){
-  static const double u32epsilon = pow(2,-32);//confirmed perfect representation. 0x3df0000000000000
+  static const double u32epsilon = pow(2,-8*sizeof(unsigned));//confirmed perfect representation for 32 bits: 0x3df0000000000000
   if(fraction==0.0) {
     return false;
   }
@@ -71,7 +71,7 @@ bool ContinuedFractionRatioGenerator::split(){
     return false;
   }
 
-  double inverse = 1.0 / fraction;
+  double inverse = 1.0 / fraction;//and this is where imprecision can theoretically enter the algorithm.
 
   an = splitteru(inverse);
   fraction = inverse;

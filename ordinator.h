@@ -121,6 +121,7 @@ public:
 //    length -= amount;
 //  }
 
+  /* once upon a time ther was a function grab which sometimes did copyHead and sometimes copyTail, depending upon whether the head was empty . That was useful but confusing. */
   /** this is halfinteral preceding other's next */
   void copyHead(const Ordinator &other){
       length = other.pointer;

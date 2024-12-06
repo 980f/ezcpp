@@ -26,7 +26,18 @@ template<typename Scalar1, typename Scalar2 = Scalar1> bool changed(Scalar1 &tar
  * the assignment does not occur.
  *  This is handy when converting a value to ascii and back, it tells you whether that was significantly corrupting.
  */
-bool changed(double&target, double newvalue,int bits = 32);
+bool changed(double&target, double newvalue,unsigned bits = 32);
+/** assigns newvlaue to target and returns -1,0, or 1 according to whether target was reduced,unchanged, or increased  */
+
+template <typename Scalar, typename Scalar2> int assigncmp(Scalar&target, Scalar2 &&newvalue) {
+  if (target != newvalue) {
+  	bool reduced = target > newvalue;
+    target = newvalue;
+    return reduced?-1:1;
+  } else {
+    return 0;
+  }
+}
 
 
 /** marker for potential atomic value shift
@@ -51,6 +62,47 @@ template<typename Scalar> void Free(Scalar **p2p){
     delete *p2p;
     *p2p = nullptr;
   }
+}
+
+/** Clear On Reference. Like core memory :) */
+template <typename Scalar> class COR {
+  Scalar memory;
+public:
+  COR(Scalar init):memory(init){
+    //#done
+  }
+
+  operator Scalar(){
+    return take(memory);
+  }
+
+  Scalar operator =(Scalar value){
+    memory = value;
+    return value;
+  }
+
+  ///////////////////////////////////////
+  // add non taking operators at need.
+
+  /** @returns whether value is not zero, without taking it */
+  operator bool()const {
+    return memory!=0;
+  }
+
+  /** added for clirp class */
+  bool operator==(Scalar other)const {
+    return memory == other;
+  }
+
+}; //end of COR.
+
+///////////////////////////////////////////////////////
+/** for test and clear, may eventually wrap atomic operation */
+template <typename Scalar> Scalar flagged(Scalar&varb) ISRISH;
+template <typename Scalar> Scalar flagged(Scalar&varb) {
+  Scalar was = varb;
+  varb = 0;
+  return was;
 }
 
 /** originally was the same code as the newer 'take' but since the code was found duplicated in another file the name wasn't quote right.

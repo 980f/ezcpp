@@ -4,6 +4,11 @@
 #include "buffer.h"
 #include "textkey.h"
 
+/** safe parsing and formatting into array of char or byte. Most especially will not write over a terminating null nor read past it.
+  It does not expect a terminating null, it is provided the length of the buffer. If you need a terminating null put one into your buffer and feed length-1 to this guy.
+  It does no dynamic memory allocation.
+  */
+
 /** signed char and unsigned char variants need to be translatable to the other */
 class ByteScanner;
 

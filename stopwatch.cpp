@@ -1,27 +1,20 @@
 #include "stopwatch.h"
 
 #include "cheaptricks.h"  //flagged
+#include "minimath.h"   //rounding divide
 
 #ifdef ARDUINO
 
-extern TimeValue millis();
-void readit(TimeValue &ts){
-  ts=millis();
+void StopWatchCore::readit(TimeValue &ts) {
+  ts = option ? micros() : millis();
 }
 
-double StopWatch::asSeconds(const TimeValue ts){
-  return (ts)*1000;//arduino hardcoded to millisecond.
+float StopWatch::asSeconds(const TimeValue ts) {
+  return rate(ts, option ? 1000000 : 1000);
 }
 
 #elif defined(__linux__)
-void readit(TimeValue &){
-//  ts=snapLongTime();
-}
-
-double StopWatch::asSeconds(const TimeValue ){
-//  return secondsForLongTime(ts);
-}
-
+#error "no longer support in ezcpp repo, try github/980f/safely"
 #else
 #include "systick.h"
 using namespace SystemTimer;
@@ -36,15 +29,20 @@ double StopWatch::asSeconds(const TimeValue ts){
 
 #endif
 
-StopWatchCore::StopWatchCore(bool beRunning,bool /*realElseProcess*/){
+
+void StopWatchCore::mark(bool andRun) {
   readit(started);
   stopped = started;
-  running = beRunning;
+  running = andRun;
+}
+
+
+StopWatchCore::StopWatchCore(bool beRunning , bool platformOption ): option(platformOption) {
+  mark(beRunning);
 }
 
 void StopWatchCore::start(){
-  readit(started);
-  running = true;
+  mark(true);
 }
 
 void StopWatchCore::stop(){
@@ -77,8 +75,8 @@ double StopWatch::absolute(){
   return asSeconds(stopped);
 }
 
-double StopWatch::elapsed(double *absolutely){
-  TimeValue delta=peek(false);
+float StopWatch::update(bool andRoll, float *absolutely) {
+  TimeValue delta = peek(andRoll);
   if(absolutely) {
     *absolutely = asSeconds(stopped);
   }

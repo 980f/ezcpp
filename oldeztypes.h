@@ -16,6 +16,7 @@ typedef uint8_t u8;
 
 #ifndef __USBAPI__  //duplicate def with arduino USB libs
 typedef uint16_t u16;
+typedef uint32_t u32;
 #endif
 //the leonardo usbapi.h defines this as well as u16 while sam version only defines u16. <sigh/>
 #if !(defined(__USBAPI__) && defined(ARDUINO_ARCH_AVR))
@@ -47,7 +48,7 @@ typedef int64_t s64;
 //in case some other compiler is used someday, this is gcc specific:
 #define PACKED __attribute__ ((packed))
 
-#if isQCU || isPCU
+#if ezOptimizeIsrs
 //function is (possibly) used in an isr, should be speed optimized:
 #define ISRISH __attribute__((optimize(3)))
 #else
