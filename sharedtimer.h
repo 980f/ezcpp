@@ -10,14 +10,14 @@ using Ticks= uint32_t;
   */
 
 
-class PolledTimer {
+class SharedTimer {
 protected:
   bool running; //changed from 'done' to 'running' so that we can init via joint ram clear rather than init code.
   Ticks systicksRemaining;
 
 public:
-  PolledTimer();
-  virtual ~PolledTimer();//in case derived classes need significant destruction.
+  SharedTimer();
+  virtual ~SharedTimer();//in case derived classes need significant destruction.
   virtual void restart(Ticks ticks);
   void restart(float seconds);//float (not double) as is often in time critical code.
   /** stops countdown without triggering onDone() */
@@ -37,7 +37,7 @@ public:
 /** automatic restart. If you are slow at polling it it may become done again while you are handling a previous done.
  * periodic event, with fairly low jitter. The period is fairly stable but the action routine can be delayed by other actions.
  */
-class CyclicTimer : public PolledTimer {
+class CyclicTimer : public SharedTimer {
 protected:
   Ticks period;
   unsigned fired;
@@ -56,11 +56,11 @@ public:
 
   void retrigger(){
     //leave fired as is.
-    PolledTimer::restart(period);
+    SharedTimer::restart(period);
   }
 
   void restart(Ticks ticks) override {
-    PolledTimer::restart(period = ticks);
+    SharedTimer::restart(period = ticks);
   }
 
   /** called when systicksRemaining goes to 0.
@@ -71,7 +71,7 @@ public:
 
 /** a server that will update all registered timers.
  * You must arrange for it to get called with each tick */
-extern void PolledTimerServer();
+extern void SharedTimerServer();
 //registration is compile time, your object must be static to be party to this service.
-#define RegisterTimer(name) Register(PolledTimer,name)
+#define RegisterTimer(name) Register(SharedTimer,name)
 

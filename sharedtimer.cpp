@@ -8,42 +8,46 @@
   * but the interested code will have to look at object to determine that the event occurred.
   * as of this note all timers are touched every cycle even if they are finished.
   * using 2 lists would make the isr faster, but all the restarts slower and restarts dominate first use.
+  *
+  * As of this implementation there can be only one instance of a shared timer, historically tied to the cortexM ssystick.
+  * To share other timers we need other instances of SharedTimerServer and add a timerid to the timer table name. The latter is costly in that we are using macros to make this facility easy to use and macros do not support default arguments.
+  *
   */
 
-MakeTable(PolledTimer);
+MakeTable(SharedTimer);
 
 /** name required by systick.h. someday we'll get alias for static class member worked out */
-void PolledTimerServer(void) {
-  ForTable(PolledTimer){
+void SharedTimerServer() {
+  ForTable(SharedTimer){
     (*it)->check();
   }
 } /* onTick */
 
 
-void PolledTimer::check(){
+void SharedTimer::check(){
   if(running){
     if(--systicksRemaining==0){
-      onDone();//default method clears running, i.e. simple PolledTimers are one-shots.
+      onDone();//default method clears running, i.e. simple SharedTimers are one-shots.
     }
   }
 }
 
-PolledTimer::PolledTimer(){
+SharedTimer::SharedTimer(){
   running = 0;
   systicksRemaining = 0;
 }
 
-PolledTimer::~PolledTimer(){
+SharedTimer::~SharedTimer(){
   //#trivial
   running=0;//reduce use-after-free consequences
 }
 
 /** typically this is overloaded if latency is important.*/
-void PolledTimer::onDone(){
+void SharedTimer::onDone(){
   running = 0;
 }
 
-void PolledTimer::restart(Ticks value){
+void SharedTimer::restart(Ticks value){
   systicksRemaining = value + 1; //to ensure minimum wait even if tick fires while we are in this code.
   if(value > 0) {//# leave expanded for debug
     running = 1; //this makes this retriggerable
@@ -53,7 +57,7 @@ void PolledTimer::restart(Ticks value){
   }
 } /* restart */
 
-void PolledTimer::freeze(){
+void SharedTimer::freeze(){
   running = false;//precludes isr touching remaining time, and onDone doesn't get called.
 }
 
@@ -65,6 +69,6 @@ bool CyclicTimer::hasFired(){
 
 void CyclicTimer::onDone(){
   ++fired;
-  //pointless: PolledTimer::onDone();
+  //pointless: SharedTimer::onDone();
   retrigger();
 }
