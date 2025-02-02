@@ -1,5 +1,4 @@
-#ifndef QUADRATURECOUNTER_H
-#define QUADRATURECOUNTER_H
+#pragma once
 
 /** quadrature table, forward motion
  *       ____      ___
@@ -24,8 +23,7 @@
 
  */
 
-/** the counting logic of quadrature decoding. To be called by some other
- * modules which tends to the physical inputs.  */
+/** the counting logic of quadrature decoding. To be called by some other module which tends to the physical inputs.  */
 class QuadratureCounter {
 public: // eventually protect
   int location = 0;
@@ -33,10 +31,8 @@ public: // eventually protect
   bool homed; //whether position is actually known
 
 public:
-  /** one arbitrarily selects one input as primary, which designation defines
-   * which way is forward. this step method is to be called for every change of
-   * the related edge, passed 'a==b' comparing that signal's new state to the
-   * other signal's (steady) state.
+  /** one arbitrarily selects one input as primary, which designation defines which way is forward. 
+   * this step method is to be called for every change of the related edge, passed the level of the other input
    */
   void stepOne(bool samePhase) {
     if (samePhase) {
@@ -46,6 +42,7 @@ public:
     }
   }
 
+  /** converse of stepOne with respect to inputs*/
   void stepOther(bool samePhase) {
     if (samePhase) {
       ++location;
@@ -54,27 +51,30 @@ public:
     }
   }
 
+    /** when cruising we set stepsize to 2 */
+  enum Stepby { //the values are only coincidentally 1<<0, 1<<1, and 1<<2, these are not bit mask definitions.
+    BothPhases= 1, //gets called
+    BothEdges = 2,
+    OneEdge = 4
+  };
+
   /** when cruising we only look at one phase, and possibly one edge.
-   * the dirstep records the direction and if one edge then set to 4, if both
-   * edges set to 2. One should only cruise when one is sure that the direction
-   * cannot change, presumably due to inertia.
+   * the dirstep records the direction and if one edge then set to 4, if both edges set to 2. 
+   * One should only cruise when one is sure that the direction cannot change, presumably due to inertia.
    */
   void cruiseDirection(int dirstep) { this->dirstep = dirstep; }
 
   /** call this with each primary edge when cruising */
   void cruiseStep() { location += dirstep; }
 
-  /** when using a hardware counter we retain the cruiseDirection setting and
-   * report the merge of the last incremental update with the count value.*/
+  /** when using a hardware counter we retain the cruiseDirection setting and report the merge of the last incremental update with the count value.
+   * @returns the new location value after applying @param count steps */
   int fly(unsigned count) const { return location + dirstep * count; }
 
-  /** when a 16 bit hardware counter wraps we need to update our internal value
-   * (unless we keep a rollover count with the counter). Also if we reset the
-   * hardware counter such as with an index mark, we need to accumulate the
-   * pre-cleared value. Unless the index is an absolute clear. */
+  /** when a 16 bit hardware counter wraps we need to update our internal value (unless we keep a rollover count with the counter). 
+   * Also if we reset the hardware counter such as with an index mark, we need to accumulate the pre-cleared value. Unless the index is an absolute clear. */
   void rollover(unsigned count) { location += dirstep * count; }
 
-  /** reset only applies to location, not to any modality of the counting. */
+  /** set only applies to location, not to any modality of the counting. */
   void set(int provided=0) { location = provided; homed=true; }
 };
-#endif // QUADRATURECOUNTER_H

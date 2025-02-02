@@ -24,7 +24,7 @@
 
 /** @returns byte address argument as a pointer to that byte */
 constexpr volatile unsigned *atAddress(const unsigned address) {
-  return reinterpret_cast<unsigned *>(address);
+  return reinterpret_cast<volatile unsigned *>(address);
 }
 
 /** graciously letting Arduino usurp our function name, will rewrite all 980F stuff to deal with it.*/
