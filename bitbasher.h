@@ -23,8 +23,8 @@
 #endif
 
 /** @returns byte address argument as a pointer to that byte */
-constexpr volatile unsigned *atAddress(const unsigned address) {
-  return reinterpret_cast<volatile unsigned *>(address);
+constexpr unsigned *atAddress(const unsigned address) {
+  return reinterpret_cast<unsigned *>(address);
 }
 
 /** graciously letting Arduino usurp our function name, will rewrite all 980F stuff to deal with it.*/
@@ -40,11 +40,11 @@ constexpr bool isEven(unsigned pattern) {
   return !isOdd(pattern);
 }
 
-template<typename Scalar> bool setBit(volatile Scalar &patter, unsigned bitnumber) {
+template<typename Scalar> bool setBit(Scalar &patter, unsigned bitnumber) {
   return patter |= (1u << bitnumber);
 }
 
-template<typename Scalar> bool setBit(volatile Scalar *patter, unsigned bitnumber) {
+template<typename Scalar> bool setBit(Scalar *patter, unsigned bitnumber) {
   return *patter |= (1u << bitnumber);
 }
 
@@ -52,11 +52,11 @@ inline bool setBitAt(unsigned addr, unsigned bitnumber) {
   return setBit(*atAddress(addr), bitnumber);
 }
 
-template<typename Scalar> bool clearBit(volatile Scalar &patter, unsigned bitnumber) {
+template<typename Scalar> bool clearBit(Scalar &patter, unsigned bitnumber) {
   return patter &= ~(1u << bitnumber);
 }
 
-template<typename Scalar> bool clearBit(volatile Scalar *patter, unsigned bitnumber) {
+template<typename Scalar> bool clearBit(Scalar *patter, unsigned bitnumber) {
   return *patter &= ~(1u << bitnumber);
 }
 
@@ -134,7 +134,7 @@ constexpr unsigned int insertField(unsigned target, unsigned source, unsigned ms
   return insertField(target, source << lsb, fieldMask(msb, lsb));
 }
 
-inline unsigned mergeField(volatile unsigned &target, unsigned source, unsigned msb, unsigned lsb) {
+inline unsigned mergeField(unsigned &target, unsigned source, unsigned msb, unsigned lsb) {
   return target = insertField(target, source, msb, lsb);
 }
 
@@ -153,12 +153,12 @@ constexpr unsigned int insertBits(unsigned target, unsigned source, unsigned lsb
   return insertField(target, source << lsb, bitMask(lsb, width));
 }
 
-inline unsigned mergeBits(volatile unsigned &target, unsigned source, unsigned lsb, unsigned width) {
+inline unsigned mergeBits(unsigned &target, unsigned source, unsigned lsb, unsigned width) {
   return mergeInto(target, source << lsb, bitMask(lsb, width));
 }
 
-inline unsigned mergeBits(volatile unsigned *target, unsigned source, unsigned lsb, unsigned width) {
-  return mergeInto(target, source << lsb, bitMask(lsb, width));
+inline unsigned mergeBits(unsigned *target, unsigned source, unsigned lsb, unsigned width) {
+  return mergeInto(*target, source << lsb, bitMask(lsb, width));
 }
 
 constexpr unsigned extractBits(unsigned source, unsigned lsb, unsigned width) {
@@ -175,11 +175,11 @@ template<unsigned lsb, unsigned msb, bool msbIsWidth = true> class BitFielder {
   };
 
 public:
-  static unsigned extract(unsigned &item) {
+  constexpr static unsigned extract(unsigned &item) {
     return (item & mask) >> lsb;
   }
 
-  unsigned operator ()(unsigned &&item) const {
+  constexpr unsigned operator ()(unsigned &&item) const {
     return extract(item);
   }
 
