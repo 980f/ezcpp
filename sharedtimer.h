@@ -17,7 +17,9 @@ protected:
 
 public:
   SharedTimer();
-  virtual ~SharedTimer();//in case derived classes need significant destruction.
+  
+  //#HEAP virtual ~SharedTimer();//in case derived classes need significant destruction.
+
   virtual void restart(Ticks ticks);
   void restart(float seconds);//float (not double) as is often in time critical code.
   /** stops countdown without triggering onDone() */

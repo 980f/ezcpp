@@ -37,10 +37,11 @@ SharedTimer::SharedTimer(){
   systicksRemaining = 0;
 }
 
-SharedTimer::~SharedTimer(){
-  //#trivial
-  running=0;//reduce use-after-free consequences
-}
+//#HEAP
+//SharedTimer::~SharedTimer(){
+//  //#trivial
+//  running=0;//reduce use-after-free consequences
+//}
 
 /** typically this is overloaded if latency is important.*/
 void SharedTimer::onDone(){
