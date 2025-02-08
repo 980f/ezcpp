@@ -126,6 +126,9 @@ template<typename Scalar> Scalar mergeInto(volatile Scalar *target, unsigned sou
 /** @returns bits @param msb through @param lsb set to 1.
    Default arg allows one to pass a width for lsb aligned mask of that many bits */
 constexpr unsigned fieldMask(unsigned msb, unsigned lsb = 0) {
+  if(msb>=31){ //todo: std::numeric_limits<unsigned>::digits){
+    return ~0<<lsb;
+  }
   return (1u << (msb + 1)) - (1u << lsb);
 }
 
@@ -134,11 +137,11 @@ constexpr unsigned int insertField(unsigned target, unsigned source, unsigned ms
   return insertField(target, source << lsb, fieldMask(msb, lsb));
 }
 
-inline unsigned mergeField(unsigned &target, unsigned source, unsigned msb, unsigned lsb) {
+constexpr unsigned mergeField(unsigned &target, unsigned source, unsigned msb, unsigned lsb) {
   return target = insertField(target, source, msb, lsb);
 }
 
-inline unsigned int extractField(unsigned int source, unsigned int msb, unsigned int lsb) {
+constexpr unsigned int extractField(unsigned int source, unsigned int msb, unsigned int lsb) {
   return (source & fieldMask(msb, lsb)) >> lsb;
 }
 

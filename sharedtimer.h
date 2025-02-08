@@ -77,3 +77,6 @@ extern void SharedTimerServer();
 //registration is compile time, your object must be static to be party to this service.
 #define RegisterTimer(name) Register(SharedTimer,name)
 
+//this can be preceded by 'static' if the object so created must be that.
+#define MakeTimer(itsClass,name, ...) itsClass name( __VA_ARGS__); RegisterTimer(name)
+
