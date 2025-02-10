@@ -65,13 +65,13 @@ inline bool clearBitAt(unsigned addr, unsigned bitnumber) {
 }
 
 /** ensure a 0:1 transition occurs on given bit. */
-inline void raiseBit(volatile unsigned &address, unsigned bit) {
+inline void raiseBit(unsigned &address, unsigned bit) {
   clearBit(address, bit);
   setBit(address, bit);
 }
 
 /** ensure a 0:1 transition occurs on given bit. */
-inline void raiseBit(volatile unsigned *address, unsigned bit) {
+inline void raiseBit(unsigned *address, unsigned bit) {
   clearBit(address, bit);
   setBit(address, bit);
 }
@@ -109,17 +109,17 @@ struct BitReference {
 };
 
 /** @returns splice of two values according to @param mask */
-template<typename Scalar> constexpr Scalar insertField(const volatile Scalar &target, unsigned source, unsigned mask) {
+template<typename Scalar> constexpr Scalar insertField(const  Scalar &target, unsigned source, unsigned mask) {
   return (target & ~mask) | (source & mask);
 }
 
 /** splices a value into another according to @param mask */
-template<typename Scalar> Scalar mergeInto(volatile Scalar &target, unsigned source, unsigned mask) {
+template<typename Scalar> Scalar mergeInto(Scalar &target, unsigned source, unsigned mask) {
   return target = insertField(target, source, mask);
 }
 
 /** splices a value into another according to @param mask */
-template<typename Scalar> Scalar mergeInto(volatile Scalar *target, unsigned source, unsigned mask) {
+template<typename Scalar> Scalar mergeInto(Scalar *target, unsigned source, unsigned mask) {
   return *target = insertField(*target, source, mask);
 }
 
@@ -186,7 +186,7 @@ public:
     return extract(item);
   }
 
-  static unsigned mergeInto(volatile unsigned &item, unsigned value) {
+  static unsigned mergeInto(unsigned &item, unsigned value) {
     unsigned merged = (item & ~mask) | ((value << lsb) & mask);
     item = merged;
     return merged;
