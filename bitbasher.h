@@ -1,7 +1,6 @@
-#ifndef BITBANGER_H
+#pragma once
 #define BITBANGER_H "need to exclude other bitbanger headers that might be laying about"
 //(C) 2017,2018 Andy Heilveil , github/980F
-
 
 /** bit and bitfield setting and getting.*/
 #define URGENTLY __attribute__((always_inline))
@@ -14,17 +13,28 @@
 #undef bitSet
 #undef bitWrite
 
-#define bit(n)         (1u<<(n))
-#define bitClear(x,n) clearBit(x,n)
-#define bitRead(x,n)  bitFrom(x,n)
-#define bitSet(x,n)   setBit(x,n)
+#define bit(n)          (1u<<(n))
+#define bitClear(x,n)   clearBit(x,n)
+#define bitRead(x,n)    bitFrom(x,n)
+#define bitSet(x,n)     setBit(x,n)
 #define bitWrite(x,n,v) assignBit(x,n,v)
 
 #endif
 
-/** @returns byte address argument as a pointer to that byte */
-constexpr unsigned *atAddress(const unsigned address) {
-  return reinterpret_cast<unsigned *>(address);
+template<typename To, typename From>
+union Punner {
+  To desired;
+  From nominal;
+  constexpr Punner(From given): nominal(given) {}
+
+  constexpr operator To() const {
+    return desired;
+  }
+};
+
+/** @returns byte address argument as a pointer to that byte. This should not create any actual runtime code with adequate optimization turned on, but the syntax was annoying to type so we take that risk. */
+constexpr unsigned *atAddress(unsigned address){
+  return Punner<unsigned *,unsigned> (address);
 }
 
 /** graciously letting Arduino usurp our function name, will rewrite all 980F stuff to deal with it.*/
@@ -127,7 +137,7 @@ template<typename Scalar> Scalar mergeInto(Scalar *target, unsigned source, unsi
    Default arg allows one to pass a width for lsb aligned mask of that many bits */
 constexpr unsigned fieldMask(unsigned msb, unsigned lsb = 0) {
   if(msb>=31){ //todo: std::numeric_limits<unsigned>::digits){
-    return ~0<<lsb;
+    return ~0u<<lsb;
   }
   return (1u << (msb + 1)) - (1u << lsb);
 }
@@ -349,4 +359,3 @@ template<typename Scalar> Scalar split(Scalar &bits, Scalar mask) {
   return discards;
 }
 
-#endif

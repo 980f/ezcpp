@@ -1,5 +1,4 @@
-#ifndef TABLEOFPOINTERS_H
-#define TABLEOFPOINTERS_H
+#pragma once
 
 /* sometimes you want a bunch of items to be processed in a group, without some place having to know of the existence of all those members.
  * IE the members can all be private to their own modules, they don't need to be known by some special module like the one with main().
@@ -24,6 +23,7 @@
 
 //tagging the table, conveniently using the pointers to begin and end as the markers for the extent of the table
 //the extreme tag numbers below are what define the range of priorites, They look like numbers but are text.
+//this approach consumes two memory locations in the rom, instead of having to edit the linker script with a section for each table.
 
 #define MakeTable(ClassM) \
 ClassM * TableTag(ClassM,0) begin##ClassM##Table(nullptr);\
@@ -64,4 +64,3 @@ Classy ObjectTag(Classy,9999999) end##Classy##sTable(nullptr)
 #define ForRefs(Classy) \
 for(Classy *it=&begin##Classy##sTable;**(++it);)
 
-#endif // TABLEOFPOINTERS_H
