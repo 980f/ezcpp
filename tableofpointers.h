@@ -1,5 +1,5 @@
 #pragma once
-
+#define TABLE_OF_POINTERS 1
 /* sometimes you want a bunch of items to be processed in a group, without some place having to know of the existence of all those members.
  * IE the members can all be private to their own modules, they don't need to be known by some special module like the one with main().
  * "Bundler" was a class that you could add as a base class and that would put all members of that class into a list.
@@ -38,7 +38,7 @@ for(ClassK * const *it=&begin##ClassK##Table;*(++it);)
 #define ObjectTag(Classy,prior) __attribute((used, section(".table." #Classy "." #prior )))
 
 //creates a thing in the list
-#define MakeObjectAt(Classy,varble,priority,...) const Classy ObjectTag(Classy,priority) varble {__VA_ARGS__}
+#define MakeObjectAt(Classy,varble,priority,...) const Classy ObjectTag(Classy,priority) varble (__VA_ARGS__)
 #define MakeObject(Classy,varble,...) MakeObjectAt(Classy,varble,5,__VA_ARGS__)
 
 //tagging the table, conveniently using the pointers to begin and end as the markers for the extent of the table
@@ -63,4 +63,3 @@ Classy ObjectTag(Classy,9999999) end##Classy##sTable(nullptr)
 
 #define ForRefs(Classy) \
 for(Classy *it=&begin##Classy##sTable;**(++it);)
-
