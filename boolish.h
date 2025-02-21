@@ -1,8 +1,8 @@
+#pragma once
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "misc-unconventional-assign-operator"
 #pragma ide diagnostic ignored "google-explicit-constructor"
 #pragma ide diagnostic ignored "cppcoreguidelines-c-copy-assignment-signature"
-#pragma once
 //#define BOOLISH_H
 
 /** allow on/off things to be passed around. This variation is modifiable. see BoolishRef for things that can be const even though they can be assigned to */

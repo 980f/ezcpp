@@ -41,14 +41,28 @@ for(ClassK * const *it=&begin##ClassK##Table;*(++it);)
 #define MakeObjectAt(Classy,varble,priority,...) const Classy ObjectTag(Classy,priority) varble (__VA_ARGS__)
 #define MakeObject(Classy,varble,...) MakeObjectAt(Classy,varble,5,__VA_ARGS__)
 
+//to use this macro your class must not do anything "live" on construction as you will make two objects which get ignored
+#define MakeObjectTable(Classy,...) \
+const Classy ObjectTag(Classy,0) begin##ClassM##Table{__VA_ARGS__};\
+const Classy ObjectTag(Classy,9999999) end##ClassM##Table{__VA_ARGS__}
+
+//for start and count iteration, see ForObjects comment
+#define ObjectTableStart(Classy) (&begin##ClassM##Table) + 1
+#define ObjectTableSize(Classy) ((&end##ClassM##Table - &begin##ClassM##Table)/sizeof(Classy)) -1
+
+/* iteration must ignore dummy first and last entities as they are used for markers, created by MakeObjectTable and the names are forced. */
+#define ForObjects(Classy) \
+for(const Classy *it=begin##Classy##sTable;++it<end##Classy##sTable;)
+
+
 //tagging the table, conveniently using the pointers to begin and end as the markers for the extent of the table
-//the extreme tag numbers below are what define the range of priorites, They look like numbers but are text.
-//note that the values in the table delimiters are irrelevent, but they are handy for debug
+//the extreme tag numbers below are what define the range of priorities, They look like numbers but are text.
+//note that the values in the table delimiters are irrelevant, but they are handy for debug
 #define MakeConstTable(Classy) \
 const Classy * TableTag(Classy,0) begin##Classy##sTable(reinterpret_cast<const Classy *const >(&begin##Classy##sTable+1));\
 const Classy * TableTag(Classy,9999999) end##Classy##sTable(reinterpret_cast<const Classy *const >(&end##Classy##sTable))
 
-#define ForObjects(Classy) \
+#define ForConstTableObjects(Classy) \
 for(const Classy *it=begin##Classy##sTable;it<end##Classy##sTable;++it)
 
 /////////////////////////////

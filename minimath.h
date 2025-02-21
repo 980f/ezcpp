@@ -1,4 +1,7 @@
 #pragma once
+//without the following define the cmath blows us out of the build, it requires some concept of "hosted"
+#define __STDC_HOSTED__ 1
+#include <cmath>
 #include <eztypes.h>
 
 //portable nan etc. symbols, our compilers don't seem to agree on these guys, or the syntax is horrible.
@@ -130,10 +133,10 @@ template <typename NumType,typename DenType=NumType>  double ratio(NumType num, 
 }
 
 //will eventually split out this section as the goal of  minimath was to NOT include math.h :P
-#include "math.h"//ceil,power,fabs,frexp
+//#include "math.h"//ceil,power,fabs,frexp
 
 inline bool isSignal(double d) {
-  return d == Nan || isnan(d);
+  return d == Nan || std::isnan(d);
 }
 
 /** quantity of bins needed to hold num items at denom items per bin. @see quanta */
