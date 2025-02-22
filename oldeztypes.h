@@ -63,6 +63,8 @@ using Handler=void(*)();
 // creates section chunks like: .text._GLOBAL__sub_I.30000_startup and more importantly .init_array.30000 to call the previous which didn't actually need to be marked.
 //requires proper linker script:
 #define InitStep(k) __attribute__((init_priority(k)))
+#define InitDo(k) __attribute__((constructor(k)))
+
 //lower happens first. some dox say leave 0..101 for the compiler.
 #define InitHardware 10000
 #define InitUserLibrary 20000
