@@ -91,7 +91,7 @@ int modulus(int value, unsigned cycle){
   return value;
 }
 
-u16 saturated(unsigned quantity, double fractionThereof){
+uint16_t saturated(unsigned quantity, double fractionThereof){
   unsigned rawbins = quantity * fractionThereof;//todo:2 is truncating rather than rounding
 
   if(rawbins >= quantity) {
