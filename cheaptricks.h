@@ -1,5 +1,4 @@
-#ifndef CHEAPTRICKS_H
-#define CHEAPTRICKS_H
+#pragma once
 #include "eztypes.h"
 
 /**
@@ -123,5 +122,3 @@ inline bool notAlready(bool &varb){
     return false;
   }
 }
-
-#endif // CHEAPTRICKS_H

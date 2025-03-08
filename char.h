@@ -1,12 +1,13 @@
-#ifndef CHAR_H
-#define CHAR_H
+#pragma once
+
+bool isPresent(const char *flags, char flag);
 
 class Char {
   public:
     char raw;
 
   public:
-    Char(char raw = 0):raw(raw) { }
+    Char(char raw = 0): raw(raw) { }
 
     Char&operator =(char newraw) {
       raw = newraw;
@@ -37,23 +38,26 @@ class Char {
     bool isUpper() const noexcept ;
     /** @returns whether this is exactly a lower case letter */
     bool isLower() const noexcept;
-
+    /** @return as lower case */
+    char asLower() const noexcept;
+    /** @return as upper case */
+    char asUpper() const noexcept;
     /** convert to lower case and @return whether that caused a change */
     bool toLower() noexcept;
-  /** convert to lower case and @return whether that caused a change */
+    /** convert to upper case and @return whether that caused a change */
     bool toUpper() noexcept;
 
-		/** @returns char conditionally toUpper'd or toLower'd or unmodified */
-		bool toCase(int which) const{
-			if(which>0 && isLower()){
-				return raw &~ 0x20;
-			} 
-			if(which<0 && isUpper()){
-				return raw | 0x20;
-			}
-			return raw;
-		}
-		
+    /** @returns char conditionally toUpper'd or toLower'd or unmodified */
+    bool toCase(int which) const {
+      if (which > 0 && isLower()) {
+        return raw & ~ 0x20;
+      }
+      if (which < 0 && isUpper()) {
+        return raw | 0x20;
+      }
+      return raw;
+    }
+
     /** @returns whether this is a decimal digit */
     bool isDigit() const noexcept;
 
@@ -119,5 +123,3 @@ class Char {
     /** @returns the c-escape partner of this. 'n' goes to newline, a newline goes to 'n' */
     char slashee()const noexcept;
 };
-
-#endif // CHAR_H

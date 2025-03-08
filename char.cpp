@@ -1,11 +1,23 @@
+//"(C) Andrew L. Heilveil, 2017"
 #include "char.h"
-#include "ctype.h"
-
-
+#include <cctype>
 #include "index.h"  //for escaping
 #include "cstr.h"   //for escaping
 
-#include "cheaptricks.h" //isPresent
+bool isPresent(const char *flags, char flag){
+  unsigned badStringLimiter = 26; //in case string pointer is garbage we don't want to read all of ram
+
+  if(flags) {
+    char probe;
+    while((probe = *flags++) && badStringLimiter-- > 0) {
+      if(flag == probe) {
+        return true;
+      }
+    }
+  }
+  return false;
+} /* isPresent */
+
 /** In the string below there are pairs of (escape code: escaped char) e.g. n\n
    it looks confusing as some of the chars being escaped are unchanged by the process.
    when removing a slash you search for the char and pass back the odd member of the pair
@@ -28,7 +40,6 @@ char Char::slashee() const noexcept {
   }
 }
 
-
 ////////////////////////////////////
 
 bool Char::numAlpha() const noexcept {
@@ -43,16 +54,24 @@ bool Char::isDigit() const noexcept {
   return isdigit(raw);
 }
 
-bool Char::isControl() const noexcept {
-  return iscntrl(raw);
+bool Char::isLower() const noexcept {
+  return 'a' <= raw && raw <= 'z';
+}
+
+char Char::asLower() const noexcept {
+  return static_cast<char>(tolower(raw));
 }
 
 bool Char::isUpper() const noexcept {
   return 'A' <= raw && raw <= 'Z';
 }
 
-bool Char::isLower() const noexcept {
-  return 'a' <= raw && raw <= 'z';
+char Char::asUpper() const noexcept {
+  return static_cast<char>(toupper(raw));
+}
+
+bool Char::isControl() const noexcept {
+  return iscntrl(raw);
 }
 
 /** convert to lower case and @return whether that caused a change */
@@ -95,7 +114,7 @@ bool Char::isHexDigit() const noexcept {
 unsigned Char::hexDigit() const noexcept {
   unsigned trusting = (raw | 0x20) - '0'; //tolowerthen subtract char for zero.
   if ((trusting > 9)) {
-    trusting -= 39;
+    trusting-=39;// ~ 'a' -'0' + 10
   }
   return trusting; //'A'-'0' = 17, want 10 for that
 }
@@ -103,4 +122,8 @@ unsigned Char::hexDigit() const noexcept {
 char Char::hexNibble(unsigned sb) const noexcept {
   unsigned char nib = 15 & (raw >> (sb * 4)); //push to low nib
   return nib > 9 ? 'A' + nib - 10 : '0' + nib;
+}
+
+bool Char::startsNumber() const noexcept {
+  return isDigit()||is('-')||is('+');//todo: ?how did this disappear
 }
