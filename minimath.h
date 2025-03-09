@@ -1,6 +1,9 @@
 #pragma once
 //without the following define the cmath blows us out of the build, it requires some concept of "hosted"
+#ifndef __STDC_HOSTED__
 #define __STDC_HOSTED__ 1
+#endif
+
 #include <cmath>
 #include <eztypes.h>
 

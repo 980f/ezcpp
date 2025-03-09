@@ -67,9 +67,7 @@ template<typename Scalar> void Free(Scalar **p2p){
 template <typename Scalar> class COR {
   Scalar memory;
 public:
-  COR(Scalar init):memory(init){
-    //#done
-  }
+  COR(Scalar init):memory(init){}
 
   operator Scalar(){
     return take(memory);
@@ -89,7 +87,7 @@ public:
   }
 
   /** added for clirp class */
-  bool operator==(Scalar other)const {
+  template<typename Comparable> bool operator==(const Comparable &other)const {
     return memory == other;
   }
 
