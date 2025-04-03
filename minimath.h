@@ -300,7 +300,7 @@ template <typename Scalar> void swap(Scalar &a, Scalar &b) {
 }
 
 extern "C" { //assembly coded in cortexm3.s, usually due to outrageously bad compilation by gcc
-  /** the time delay given by ticks is ambiguous, it depends upon processor clock. @72MHz 1000 ticks is roughly one microsecond.*/
+  /** the time delay given by ticks is ambiguous, it depends upon processor clock. For STM32F103 @72MHz 1000 ticks is roughly one microsecond.*/
   void nanoSpin(unsigned ticks); //fast spinner, first used in soft I2C.
 
   /** @returns @param arg*num/denom rounded and overflow managed (internal 64 bit temps)  */
