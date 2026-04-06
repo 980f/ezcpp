@@ -1,6 +1,5 @@
-#ifndef LIMITEDPOINTER_H
-#define LIMITEDPOINTER_H
-#include <stdint.h>
+#pragma once
+//#include <stdint.h>
 
 /** a pointer into an externally allocated array of some type. Given that range this keeps itself within that range (if you let it).
   The class is slightly inconsistent in that if you run off the end you get the beginning from then on (if there is one),
@@ -9,16 +8,17 @@
   This allows an embedded program to keep on running with a defect that you will hopefully notice rather than going tits up in code that might not matter much.
 */
 
-template <typename Scalar> class LimitedPointer {
+template <typename Scalar>
+class LimitedPointer {
     Scalar *pointer;
     Scalar *base;
     Scalar *end; // actually one past the end, halfopen interval
 
   public:
-  /** using a signed quantity so that an all-ones marker value for 'none' works the same as 0 */
+    /** using a signed quantity so that an all-ones marker value for 'none' works the same as 0 */
     LimitedPointer(Scalar *theBase, size_t quantity = 0):
       base( (quantity > 0) ? theBase : nullptr),
-      end( base&&(quantity > 0) ? &(base[quantity]) : nullptr {
+      end( base && (quantity > 0) ? & (base[quantity]) : nullptr) {
       pointer = base;
     }
 
@@ -37,8 +37,8 @@ template <typename Scalar> class LimitedPointer {
     }
 
     /** @returns a reference to an element of the block, IFFI the block is valid which is NOT checked.
- * This is only safe to use if you hae already tested wellDefined() && isValid(), which is what
-     */
+       This is only safe to use if you have already tested wellDefined() && isValid(), which is what operator bool does
+    */
     Scalar &next() {
       if (*this) {
         return *pointer++;
@@ -52,13 +52,13 @@ template <typename Scalar> class LimitedPointer {
       return hasNext();
     }
 
-    /** use like pointer. If object is invalid expect an NPE in caller code */
+    /** use like pointer. If object is invalid (such as zero length array was given to constructor) expect an NPE in caller code */
     Scalar &operator *() const {
       return isValid() ? *pointer : *base;
     }
 
     /** @returns the recent selection, or the 1st, which might be nullptr */
-    operator Scalar *() const {
+    operator Scalar * () const {
       if (isValid()) {
         return pointer;
       } else {
@@ -67,7 +67,8 @@ template <typename Scalar> class LimitedPointer {
     }
 
     /** @returns object offset by @param index relative to this pointer, but base object if index is out of range.
- * not using unsigned as index -1 is 'previous' and that is a valid concept for this guy */
+       not using unsigned as index -1 is 'previous' and that is a valid concept for this guy
+    */
     Scalar &operator [](int index) const {
       Scalar &proposed = pointer[index];
       if (&proposed >= end) {
@@ -81,7 +82,7 @@ template <typename Scalar> class LimitedPointer {
 
 
     /** moves pointer given amount, limiting to one past the end or to the first if out of range. */
-    LimitedPointer &operator +=(int amount) {
+    LimitedPointer & operator +=(int amount) {
       Scalar *proposed = pointer + amount;
       if (proposed >= end) {
         pointer = end; //value here and below are chosen for easy debug of most common fault cases.
@@ -93,27 +94,27 @@ template <typename Scalar> class LimitedPointer {
       return *this;
     }
 
-    LimitedPointer &operator -=(int amount) {
+    LimitedPointer & operator -=(int amount) {
       return this->operator +=(-amount);
     }
 
     /** pre increment */
-    LimitedPointer &operator ++() {
+    LimitedPointer & operator ++() {
       return this->operator +=(1);
     }
 
     /** pre-decrement */
-    LimitedPointer &operator --() {
+    LimitedPointer & operator --() {
       return this->operator +=(-1);
     }
 
   private:
     /** post-increment: can't find a use (nor cost-effective) use for this, see next() function.*/
-    LimitedPointer &operator ++(int) {
+    LimitedPointer & operator ++(int) {
       return this->operator +=(1);
     }
     /** post-decrement: can't find a use (nor cost-effective) use for this, see next() function.*/
-    LimitedPointer &operator --(int) {
+    LimitedPointer & operator --(int) {
       return this->operator -=(1);
     }
 
@@ -140,4 +141,4 @@ template <typename Scalar> class LimitedPointer {
     }
 };
 
-#endif // LIMITEDPOINTER_H
+// LIMITEDPOINTER_H
