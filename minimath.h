@@ -1,4 +1,7 @@
 #pragma once
+
+/** math functions that might be best implement in assembler, or that are expressions whose function isn't obvious and therefore are worthy of a name. */
+
 //without the following define the cmath blows us out of the build, it requires some concept of "hosted"
 #ifndef __STDC_HOSTED__
 #define __STDC_HOSTED__ 1
@@ -44,7 +47,7 @@ template <typename SignedInt> int signabs(SignedInt& absolutatus) {
 }
 
 /** Note: 'signbit' is a macro in math.h that pertains only to floating point arguments
- * @returns sign of operand, and converts operand to its magnitude, MININT(0x800...) is still MININT and must be interpreted as unsigned to work correctly
+ * @returns magnitude of operand, and if given a pointer for the sign updates that, MININT(0x800...) is still MININT and must be interpreted as unsigned to work correctly
  */
 template<typename Numerical> Numerical absvalue(Numerical absolutatus, int *sign = nullptr){
   if(absolutatus < 0) {
@@ -70,7 +73,7 @@ template <typename mathy> int signof(mathy x) {
   return 0;
 }
 
-/** @returns sign of x-y */
+/** @returns sign of x-y, especially useful for unsigned types. */
 template <typename mathy> int signof(mathy x,mathy y) {
   if (x < y) {
     return -1;
@@ -87,7 +90,7 @@ inline int polarity(bool positive){
 }
 
 /** @returns -1 if @param lhs is < @param rhs, 0 if lhs==rhs, +1 if lhs>rhs .
- *  If you are using this to sort ascending if returns + then move lhs to higher than rhs.
+ *  If you are using this to sort ascending: if returns + then move lhs to higher than rhs.
  *  Someday this will use <=> but we aren't at that level of C++ for all processors that this code runs on.
  */
 template< typename mathy > int compareof(mathy lhs,mathy rhs){
@@ -121,12 +124,12 @@ template<typename Integer,typename Inttoo> Integer quanta(Integer num, Inttoo de
   if (denom == 0) {
     return num == 0 ? 1 : 0; //pathological case
   }
-  //todo:0 is typeof num is signed do what 'half' does.
+  //todo:0 if typeof num is signed do what 'half' does.
   return (num + denom - 1) / denom;
 }
 
 /** @returns @param num / @param denom, protecting against garbage in (divide by zero) note: 0/0 is 0, not 1
- * If you know you are using integers then consider using @see rateof @see quanta instead, one of those is more likely to be what you want.
+ * If you know you are using integers then consider using @see rateof or @see quanta instead, one of those is more likely to be what you want.
  */
 template <typename NumType,typename DenType=NumType>  double ratio(NumType num, DenType denom) {
   if (denom == 0) { //pathological case
