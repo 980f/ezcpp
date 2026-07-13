@@ -39,7 +39,7 @@ typedef int64_t s64;
 /**for when you want to live dangerously.
    We use the convention that all references have been confirmed non-null.
    only use this when you are feeding an &(expression) */
-#define NullRef(type) (*reinterpret_cast <type *> (nullptr))
+#define NullRef(type) (*reinterpret_cast <type *> (0))
 
 
 //lord it would be nice if C would make a standard operator for this:
@@ -55,9 +55,10 @@ typedef int64_t s64;
 #define ISRISH
 #endif
 
-//a function suitable for handling interrupts:
-// typedef void (*Handler)();
-using Handler=void(*)();
+//too generic a name to be in global scope:
+////a function suitable for handling interrupts:
+//// typedef void (*Handler)();
+//using Handler=void(*)();
 
 //note: the linker is the agent that makes this happen. It fails if your linker script leaves out SORT(...)
 // creates section chunks like: .text._GLOBAL__sub_I.30000_startup and more importantly .init_array.30000 to call the previous which didn't actually need to be marked.

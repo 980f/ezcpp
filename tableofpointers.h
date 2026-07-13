@@ -48,7 +48,7 @@ const Classy ObjectTag(Classy,9999999) end##ClassM##Table{__VA_ARGS__}
 
 //for start and count iteration, see ForObjects comment
 #define ObjectTableStart(Classy) (&begin##Classy##Table) + 1
-#define ObjectTableSize(Classy) ((&end##Classy##Table - &begin##Classy##Table)/sizeof(Classy)) -1
+#define ObjectTableCount(Classy) ((&end##Classy##Table - &begin##Classy##Table)/sizeof(Classy)) -1
 
 /* iteration must ignore dummy first and last entities as they are used for markers, created by MakeObjectTable and the names are forced. */
 #define ForObjects(Classy) \

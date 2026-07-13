@@ -9,7 +9,7 @@ void StopWatchCore::readit(TimeValue &ts) {
   ts = option ? micros() : millis();
 }
 
-float StopWatch::asSeconds(const TimeValue ts) {
+double StopWatch::asSeconds(const TimeValue ts) {
   return rate(ts, option ? 1000000 : 1000);
 }
 
@@ -109,4 +109,3 @@ unsigned StopWatch::cycles(double atHz,bool andRoll){
   }
   return cycles;
 }
-
