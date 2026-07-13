@@ -6,7 +6,7 @@
  * That however required that all objects be mutable as the mechanism involved a linkedlist that is modified during construction,
  * which in turn required code to do that construction on every program start.
  *
- * This set of macro's lets you build a table in rom of pointers to members of the list, the objects can themselves be const (insome variants of the mechanism).
+ * This set of macro's lets you build a table in rom of pointers to members of the list, the objects can themselves be const (in some variants of the mechanism).
  * There are a few variants on the theme depending upon whether the table is const objects, pointers to objects.
  *
  * you will have to add a *(KEEP(.table.*)) to your linker script ROM section.
@@ -47,8 +47,8 @@ const Classy ObjectTag(Classy,0) begin##ClassM##Table{__VA_ARGS__};\
 const Classy ObjectTag(Classy,9999999) end##ClassM##Table{__VA_ARGS__}
 
 //for start and count iteration, see ForObjects comment
-#define ObjectTableStart(Classy) (&begin##ClassM##Table) + 1
-#define ObjectTableSize(Classy) ((&end##ClassM##Table - &begin##ClassM##Table)/sizeof(Classy)) -1
+#define ObjectTableStart(Classy) (&begin##Classy##Table) + 1
+#define ObjectTableSize(Classy) ((&end##Classy##Table - &begin##Classy##Table)/sizeof(Classy)) -1
 
 /* iteration must ignore dummy first and last entities as they are used for markers, created by MakeObjectTable and the names are forced. */
 #define ForObjects(Classy) \
@@ -77,3 +77,24 @@ Classy ObjectTag(Classy,9999999) end##Classy##sTable(nullptr)
 
 #define ForRefs(Classy) \
 for(Classy *it=&begin##Classy##sTable;**(++it);)
+
+/* all of the above are things that the creator of the service deals with, not the user of the service
+
+Example of what the creator of the service has to add to its header, using SharedTimer as a class of object that gets periodically checked:
+
+//registration is compile time, your object must be static to be party to this service.
+#define RegisterTimer(name) Register(SharedTimer,name)
+
+//this can be preceded by 'static' if the object so created must be that.
+#define MakeTimer(itsClass,name, ...) itsClass name( __VA_ARGS__); RegisterTimer(name)
+
+The actual user of a SharedTimer just creates them like:
+MakeTimer(DerivedFromSharedTimerClass, instancename);
+
+Or if there are no virtuals in the class just define in the class:
+#define MakeServiceItem(name, ...) ServiceItem name( __VA_ARGS__); <some more stuff goes here>
+
+And in each using module:
+MakeServiceItem(instancename, constructor args); 
+
+*/
