@@ -55,9 +55,8 @@ double ContinuedFractionRatioGenerator::approximation() const{
 }
 
 double ContinuedFractionRatioGenerator::best(){
-  //we use a counter to guard against bad input parameters. Termination is normally done due to the 'limit' value which is default set to note overflow in the computation.
-  for (unsigned steps = 32; steps-->0&&step();) {
-  }
+  //we use a counter to guard against bad input parameters. Termination is normally done due to the 'limit' value which is default set to not overflow in the computation.
+  for (unsigned steps = 32; steps-->0&&step();) {/*everything is done in step()*/}
   return approximation();
 } // ContinuedFractionRatioGenerator::step
 
